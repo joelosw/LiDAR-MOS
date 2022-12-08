@@ -52,26 +52,29 @@ class Logger(object):
         """Log a histogram of the tensor of values."""
 
         # Create a histogram using numpy
-        counts, bin_edges = np.histogram(values, bins=bins)
+        # counts, bin_edges = np.histogram(values, bins=bins)
 
-        # Fill the fields of the histogram proto
-        hist = tf.HistogramProto()
-        hist.min = float(np.min(values))
-        hist.max = float(np.max(values))
-        hist.num = int(np.prod(values.shape))
-        hist.sum = float(np.sum(values))
-        hist.sum_squares = float(np.sum(values ** 2))
+        # # Fill the fields of the histogram proto
+        # hist = tf.compat.v1.HistogramProto()
+        # hist.min = float(np.min(values))
+        # hist.max = float(np.max(values))
+        # hist.num = int(np.prod(values.shape))
+        # hist.sum = float(np.sum(values))
+        # hist.sum_squares = float(np.sum(values ** 2))
 
-        # Drop the start of the first bin
-        bin_edges = bin_edges[1:]
+        # # Drop the start of the first bin
+        # bin_edges = bin_edges[1:]
 
-        # Add bin edges and counts
-        for edge in bin_edges:
-            hist.bucket_limit.append(edge)
-        for c in counts:
-            hist.bucket.append(c)
+        # # Add bin edges and counts
+        # for edge in bin_edges:
+        #     hist.bucket_limit.append(edge)
+        # for c in counts:
+        #     hist.bucket.append(c)
 
-        # Create and write Summary
-        summary = tf.Summary(value=[tf.Summary.Value(tag=tag, histo=hist)])
-        self.writer.add_summary(summary, step)
+        # # Create and write Summary
+        # summary = tf.compat.v1.Summary(value=[tf.compat.v1.Summary.Value(tag=tag, histo=hist)])
+        # self.writer.add_summary(summary, step)
+        # self.writer.flush()
+        with self.writer.as_default():
+            tf.summary.histogram(name=tag, data=values, step=step)
         self.writer.flush()

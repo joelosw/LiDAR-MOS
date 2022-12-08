@@ -127,7 +127,7 @@ if __name__ == '__main__':
     print("uncertainty", FLAGS.uncertainty)
     print("Total of Trainable Parameters: {}".format(millify(pytorch_total_params,2)))
     print("log", FLAGS.log)
-    print("pretrained", FLAGS.pretrained)
+    print("pretrained: ", FLAGS.pretrained)
     print("----------\n")
     # print("Commit hash (training version): ", str(
     #    subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip()))

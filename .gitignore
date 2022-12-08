@@ -5,7 +5,7 @@
 # special for LiDAR-MOS
 *.idea*
 __pycache__
-
+logs
 
 ### C++ ###
 # Prerequisites

@@ -1,0 +1,1 @@
+./train.sh -d /home/joe46973/Masterarbeit/data/KITTI/dataset/ -a salsanext_mos.yml -l second_training_log -p second_training_log/logs/2022-12-06-11\:16 -c 0 

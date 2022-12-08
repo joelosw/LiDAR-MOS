@@ -1,0 +1,6 @@
+pyyaml
+tqdm
+matplotlib
+numpy
+scipy
+opencv-python

@@ -1,0 +1,38 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: training with args",
+            "type": "python",
+            "args": [
+                "-d",
+                "/home/joe46973/Masterarbeit/data/KITTI/dataset/",
+                "-ac",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/salsanext_mos.yml",
+                "-l",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/second_training_log",
+                "-p",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/second_training_log/logs/2022-12-08-10:19",
+                "-u",
+                "false"
+
+            ],
+            "request": "launch",
+            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/train/tasks/semantic/train.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/mos_SalsaNext/train/tasks/semantic",
+            "justMyCode": false
+        }
+    ]
+}

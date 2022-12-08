@@ -20,41 +20,13 @@ except:
   from utils import range_projection
 
 
-if __name__ == '__main__':
-  # load config file
-  config_filename = 'config/data_preparing.yaml'
-  if len(sys.argv) > 1:
-    config_filename = sys.argv[1]
-  
-  if yaml.__version__ >= '5.1':
-    config = yaml.load(open(config_filename), Loader=yaml.FullLoader)
-  else:
-    config = yaml.load(open(config_filename))
-  
-  # specify parameters
-  num_frames = config['num_frames']
-  debug = config['debug']
-  normalize = config['normalize']
-  num_last_n = config['num_last_n']
-  visualize = config['visualize']
-  visualization_folder = config['visualization_folder']
-  
-  # specify the output folders
-  residual_image_folder = config['residual_image_folder']
-  if not os.path.exists(residual_image_folder):
-    os.makedirs(residual_image_folder)
-    
-  if visualize:
-    if not os.path.exists(visualization_folder):
-      os.makedirs(visualization_folder)
-  
-  # load poses
-  pose_file = config['pose_file']
+def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folder, visualization_folder, range_image_params ): 
+  print(f'Looking for poses in {pose_file}')
   poses = np.array(load_poses(pose_file))
   inv_frame0 = np.linalg.inv(poses[0])
   
   # load calibrations
-  calib_file = config['calib_file']
+  
   T_cam_velo = load_calib(calib_file)
   T_cam_velo = np.asarray(T_cam_velo).reshape((4, 4))
   T_velo_cam = np.linalg.inv(T_cam_velo)
@@ -66,7 +38,7 @@ if __name__ == '__main__':
   poses = np.array(new_poses)
   
   # load LiDAR scans
-  scan_folder = config['scan_folder']
+  
   scan_paths = load_files(scan_folder)
   
   # test for the first N scans
@@ -76,7 +48,7 @@ if __name__ == '__main__':
     poses = poses[:num_frames]
     scan_paths = scan_paths[:num_frames]
   
-  range_image_params = config['range_image']
+  
   
   # generate residual images for the whole sequence
   for frame_idx in tqdm(range(len(scan_paths))):
@@ -138,3 +110,40 @@ if __name__ == '__main__':
 
       # save residual image
       np.save(file_name, diff_image)
+
+
+if __name__ == '__main__':
+  # load config file
+  config_filename = 'config/data_preparing.yaml'
+  if len(sys.argv) > 1:
+    config_filename = sys.argv[1]
+  
+  if yaml.__version__ >= '5.1':
+    config = yaml.load(open(config_filename), Loader=yaml.FullLoader)
+  else:
+    config = yaml.load(open(config_filename))
+  
+  for num_seq in config['seqs']:
+    # specify parameters
+    num_frames = config['num_frames']
+    debug = config['debug']
+    normalize = config['normalize']
+    num_last_n = config['num_last_n']
+    visualize = config['visualize']
+    visualization_folder = config['visualization_folder'].replace('SEQ_NUM', str(num_seq))
+    
+    # specify the output folders
+    residual_image_folder = config['residual_image_folder'].replace('SEQ_NUM', str(num_seq))
+    if not os.path.exists(residual_image_folder):
+      os.makedirs(residual_image_folder)
+      
+    if visualize:
+      if not os.path.exists(visualization_folder):
+        os.makedirs(visualization_folder)
+    
+    # load poses
+    pose_file = config['pose_file'].replace('SEQ_NUM', str(num_seq))
+    calib_file = config['calib_file'].replace('SEQ_NUM', str(num_seq))
+    scan_folder = config['scan_folder'].replace('SEQ_NUM', str(num_seq))
+    range_image_params = config['range_image']
+    generate_res_images(pose_file, calib_file, scan_folder, residual_image_folder, visualization_folder, range_image_params)

@@ -179,6 +179,7 @@ class Trainer():
             torch.nn.Module.dump_patches = True
             w_dict = torch.load(path + "/SalsaNext",
                                 map_location=lambda storage, loc: storage)
+            print(f'Loaded State dict with keys: {w_dict.keys()}')
             self.model.load_state_dict(w_dict['state_dict'], strict=True)
             self.optimizer.load_state_dict(w_dict['optimizer'])
             self.epoch = w_dict['epoch'] + 1
@@ -248,6 +249,18 @@ class Trainer():
                 name = os.path.join(directory, str(i) + ".png")
                 cv2.imwrite(name, img)
 
+    @staticmethod
+    def recurse_dict_types(obj, level=0):
+        print(level*"\t" + f" type: {type(obj)}")
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if isinstance(v, dict):
+                    print((level+1)*"\t" + f"{k} hast type: {type(v)}")
+                    Trainer.recurse_dict_types(v, level + 2)
+                else:
+                    print((level+1)*"\t" + f"{k} has type: {type(v)}")
+            
+
     def train(self):
 
         self.ignore_class = []
@@ -272,7 +285,7 @@ class Trainer():
                                                            color_fn=self.parser.to_color,
                                                            report=self.ARCH["train"]["report_batch"],
                                                            show_scans=self.ARCH["train"]["show_scans"])
-
+            print(f"Epoch {epoch} training finished")
             # update info
             self.info["train_update"] = update_mean
             self.info["train_loss"] = loss
@@ -281,11 +294,18 @@ class Trainer():
             self.info["train_hetero"] = hetero_l
 
             # remember best iou and save checkpoint
+            # state = {'epoch': epoch, 'state_dict': self.model.state_dict(),
+            #          'optimizer': self.optimizer.state_dict(),
+            #          'info': self.info,
+            #          'scheduler': self.scheduler.state_dict()
+            #          }
             state = {'epoch': epoch, 'state_dict': self.model.state_dict(),
                      'optimizer': self.optimizer.state_dict(),
                      'info': self.info,
                      'scheduler': self.scheduler.state_dict()
                      }
+
+            #self.recurse_dict_types(state,0)
             save_checkpoint(state, self.log, suffix="")
 
             if self.info['train_iou'] > self.info['best_train_iou']:
