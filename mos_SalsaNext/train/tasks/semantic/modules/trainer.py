@@ -541,7 +541,7 @@ class Trainer():
                     output = model(in_vol)
                     log_out = torch.log(output.clamp(min=1e-8))
                     jacc = self.ls(output, proj_labels)
-                    wce = criterion(log_out, proj_labels)
+                    wce = criterion(log_out, proj_labels.long())
                     loss = wce + jacc
 
                 # measure accuracy and record loss
