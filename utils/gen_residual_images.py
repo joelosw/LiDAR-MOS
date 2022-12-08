@@ -9,6 +9,7 @@ import yaml
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import cv2
 
 from utils import load_poses, load_calib, load_files, load_vertex
 
@@ -92,21 +93,46 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
       
       if debug:
         fig, axs = plt.subplots(3)
+        diff_image_marked = np.zeros(list(last_range_transformed.shape) + [3])
+        diff_image_marked[:,:,0] = 0.99
+        diff_image_marked[valid_mask,0] = diff_image[valid_mask]
+        diff_image_marked[valid_mask,1] = diff_image[valid_mask]
+        diff_image_marked[valid_mask,2] = diff_image[valid_mask]
         axs[0].imshow(last_range_transformed)
         axs[1].imshow(current_range)
-        axs[2].imshow(diff_image, vmin=0, vmax=10)
+        axs[2].imshow(diff_image_marked, vmin=0, vmax=10)
         plt.show()
         
       if visualize:
-        fig = plt.figure(frameon=False, figsize=(16, 10))
-        fig.set_size_inches(20.48, 0.64)
-        ax = plt.Axes(fig, [0., 0., 1., 1.])
-        ax.set_axis_off()
-        fig.add_axes(ax)
-        ax.imshow(diff_image, vmin=0, vmax=1)
-        image_name = os.path.join(visualization_folder, str(frame_idx).zfill(6))
-        plt.savefig(image_name)
-        plt.close()
+        diff_image_marked = np.zeros(list(last_range_transformed.shape) + [3])
+        diff_image_scaled = diff_image/diff_image.max()
+        diff_image_marked[:,:,2] = 0.99
+        diff_image_marked[valid_mask,0] = diff_image_scaled[valid_mask]
+        diff_image_marked[valid_mask,1] = diff_image_scaled[valid_mask]
+        diff_image_marked[valid_mask,2] = diff_image_scaled[valid_mask]
+        image_name = os.path.join(visualization_folder, str(frame_idx).zfill(6) + "_diff.png")
+        #cv2.imshow("Bla", (diff_image_marked*255).astype(np.uint8))
+        cv2.imwrite(image_name, (diff_image_marked*255).astype(np.uint8))
+        valid_mask = (current_range > range_image_params['min_range']) & \
+                      (current_range < range_image_params['max_range'])
+        current_range_scaled = current_range/current_range.max()
+        current_image_marked = np.zeros(list(last_range_transformed.shape) + [3])
+        current_image_marked[:,:,2] = 0.99
+        current_image_marked[valid_mask,0] = current_range_scaled[valid_mask]
+        current_image_marked[valid_mask,1] = current_range_scaled[valid_mask]
+        current_image_marked[valid_mask,2] = current_range_scaled[valid_mask]
+        image_name = os.path.join(visualization_folder, str(frame_idx).zfill(6) + "_current.png")
+        cv2.imwrite(image_name, (current_image_marked*255).astype(np.uint8))
+        valid_mask = (last_range_transformed > range_image_params['min_range']) & \
+                      (last_range_transformed < range_image_params['max_range'])
+        last_range_transformed_scaled = last_range_transformed/current_range.max()
+        transformed_image_marked = np.zeros(list(last_range_transformed.shape) + [3])
+        transformed_image_marked[:,:,2] = 0.99
+        transformed_image_marked[valid_mask,0] = last_range_transformed_scaled[valid_mask]
+        transformed_image_marked[valid_mask,1] = last_range_transformed_scaled[valid_mask]
+        transformed_image_marked[valid_mask,2] = last_range_transformed_scaled[valid_mask]
+        image_name = os.path.join(visualization_folder, str(frame_idx).zfill(6) + "_transformed.png")
+        cv2.imwrite(image_name, (transformed_image_marked*255).astype(np.uint8))
 
       # save residual image
       np.save(file_name, diff_image)
