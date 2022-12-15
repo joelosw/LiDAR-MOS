@@ -98,9 +98,13 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
         diff_image_marked[valid_mask,0] = diff_image[valid_mask]
         diff_image_marked[valid_mask,1] = diff_image[valid_mask]
         diff_image_marked[valid_mask,2] = diff_image[valid_mask]
+        axs[0].set_title("Last Scan transformed")
         axs[0].imshow(last_range_transformed)
+        axs[1].set_title("Current Scan")
         axs[1].imshow(current_range)
+        axs[2].set_title("Diff Image (Invalid Red)")
         axs[2].imshow(diff_image_marked, vmin=0, vmax=10)
+        fig.tight_layout()
         plt.show()
         
       if visualize:

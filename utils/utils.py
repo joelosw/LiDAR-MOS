@@ -26,6 +26,8 @@ def load_poses(pose_path):
       with open(pose_path, 'r') as f:
         lines = f.readlines()
         for line in lines:
+          if "##" in line:
+            line = line.split("##")[1]
           T_w_cam0 = np.fromstring(line, dtype=float, sep=' ')
           T_w_cam0 = T_w_cam0.reshape(3, 4)
           T_w_cam0 = np.vstack((T_w_cam0, [0, 0, 0, 1]))
