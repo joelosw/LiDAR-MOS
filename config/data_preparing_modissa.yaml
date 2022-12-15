@@ -1,0 +1,43 @@
+# This file is covered by the LICENSE file in the root of this project.
+# Developed by: Xieyuanli Chen
+# Configuration for preparing residual images (specifying all the paths)
+# --------------------------------------------------------------------
+
+# General parameters
+# number of frames for training, -1 uses all frames
+num_frames: -1
+# plot images
+debug: False
+# normalize/scale the difference with corresponding range value
+normalize: True
+# use the last n frame to calculate the difference image
+num_last_n: 1
+
+
+# Inputs
+
+
+seqs: ["00"]
+
+# the folder of raw LiDAR scans
+scan_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/Sequence_2/o2_sensor_frame_bins'
+# ground truth poses file
+pose_file: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/Sequence_2/poses.txt'
+# calibration file
+calib_file: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/Sequence_2/calib.txt'
+
+# Outputs
+# the suffix should be the same as num_last_n!
+residual_image_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/Sequence_2/o2_residual_images_1'
+visualize: True
+visualization_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/Sequence_2/o2_visualization_1'
+
+# range image parameters
+range_image:
+  height: 128
+  width: 2048
+  fov_up: 11.25
+  fov_down: -11.25
+  max_range: 50.0
+  min_range: 2.0
+
