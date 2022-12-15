@@ -73,7 +73,7 @@ class SemanticKitti(Dataset):
                color_map,     # colors dict bgr (e.g 10: [255, 0, 0])
                learning_map,  # classes to learn (0 to N-1 for xentropy)
                learning_map_inv,    # inverse of previous (recover labels)
-               sensor,              # sensor to parse scans from
+               dataset_config,              # sensor to parse scans from
                max_points=150000,   # max number of points present in dataset
                gt=True,             # send ground truth?
                transform=False):
@@ -84,15 +84,16 @@ class SemanticKitti(Dataset):
     self.color_map = color_map
     self.learning_map = learning_map
     self.learning_map_inv = learning_map_inv
-    self.sensor = sensor
-    self.sensor_img_H = sensor["img_prop"]["height"]
-    self.sensor_img_W = sensor["img_prop"]["width"]
-    self.sensor_img_means = torch.tensor(sensor["img_means"],
+    self.dataset_config = dataset_config
+    self.sensor = dataset_config['sensor']
+    self.sensor_img_H = self.sensor["img_prop"]["height"]
+    self.sensor_img_W = self.sensor["img_prop"]["width"]
+    self.sensor_img_means = torch.tensor(self.sensor["img_means"],
                                          dtype=torch.float)
-    self.sensor_img_stds = torch.tensor(sensor["img_stds"],
+    self.sensor_img_stds = torch.tensor(self.sensor["img_stds"],
                                         dtype=torch.float)
-    self.sensor_fov_up = sensor["fov_up"]
-    self.sensor_fov_down = sensor["fov_down"]
+    self.sensor_fov_up = self.sensor["fov_up"]
+    self.sensor_fov_down = self.sensor["fov_down"]
     self.max_points = max_points
     self.gt = gt
     self.transform = transform
@@ -105,9 +106,9 @@ class SemanticKitti(Dataset):
     self.index_mapping = {}
     dataset_index = 0
     # added this for dynamic object removal
-    self.n_input_scans = sensor["n_input_scans"]  # This needs to be the same as in arch_cfg.yaml!
-    self.use_residual = sensor["residual"]
-    self.transform_mod = sensor["transform"]
+    self.n_input_scans = self.sensor["n_input_scans"]  # This needs to be the same as in arch_cfg.yaml!
+    self.use_residual = self.sensor["residual"]
+    self.transform_mod = self.sensor["transform"]
     """"""
 
     # get number of classes (can't be len(self.learning_map) because there
@@ -146,18 +147,26 @@ class SemanticKitti(Dataset):
     # fill in with names, checking that all sequences are complete
     for seq in self.sequences:
       # to string
-      seq = '{0:02d}'.format(int(seq))
+      if not isinstance(seq, str):
+        seq = '{0:02d}'.format(int(seq))
 
       print("parsing seq {}".format(seq))
 
       # get paths for each
-      scan_path = os.path.join(self.root, seq, "velodyne")
+      if 'scan_folder' in self.dataset_config.keys():
+        scan_path = os.path.join(self.root, seq, self.dataset_config['scan_folder'])
+      else:
+        scan_path = os.path.join(self.root, seq, "velodyne")
       label_path = os.path.join(self.root, seq, "labels")
       
       if self.use_residual:
         for i in range(self.n_input_scans):
-          folder_name = "residual_images_" + str(i+1)
+          if 'residual_folder_name' in self.dataset_config.keys():
+            folder_name = self.dataset_config['residual_folder_name'] + str(i+1)
+          else:
+            folder_name = "residual_images_" + str(i+1)
           exec("residual_path_" + str(i+1) + " = os.path.join(self.root, seq, folder_name)")
+          print(f'residual_path_1 = {eval("residual_path_1")}')
         
       # get files
       scan_files = [os.path.join(dp, f) for dp, dn, fn in os.walk(
@@ -176,11 +185,13 @@ class SemanticKitti(Dataset):
       """
       # load poses
       pose_file = os.path.join(self.root, seq, "poses.txt")
+      print(f"Loading poses {pose_file}")
       poses = np.array(load_poses(pose_file))
       inv_frame0 = np.linalg.inv(poses[0])
 
       # load calibrations
       calib_file = os.path.join(self.root, seq, "calib.txt")
+      print(f"Loading calibration {calib_file}")
       T_cam_velo = load_calib(calib_file)
       T_cam_velo = np.asarray(T_cam_velo).reshape((4, 4))
       T_velo_cam = np.linalg.inv(T_cam_velo)
@@ -293,6 +304,7 @@ class SemanticKitti(Dataset):
       # make a tensor of the uncompressed data (with the max num points)
       unproj_n_points = scan.points.shape[0]
       unproj_xyz = torch.full((self.max_points, 3), -1.0, dtype=torch.float)
+
       unproj_xyz[:unproj_n_points] = torch.from_numpy(scan.points)
       unproj_range = torch.full([self.max_points], -1.0, dtype=torch.float)
       unproj_range[:unproj_n_points] = torch.from_numpy(scan.unproj_range)
@@ -390,7 +402,7 @@ class Parser():
                color_map,         # color for each label
                learning_map,      # mapping for training labels
                learning_map_inv,  # recover labels from xentropy
-               sensor,            # sensor to use
+               dataset_config,            # sensor to use
                max_points,        # max points in each scan in entire dataset
                batch_size,        # batch size for train and val
                workers,           # threads to load data
@@ -408,7 +420,7 @@ class Parser():
     self.color_map = color_map
     self.learning_map = learning_map
     self.learning_map_inv = learning_map_inv
-    self.sensor = sensor
+    self.dataset_config = dataset_config
     self.max_points = max_points
     self.batch_size = batch_size
     self.workers = workers
@@ -419,14 +431,14 @@ class Parser():
     self.nclasses = len(self.learning_map_inv)
 
     # Data loading code
-    if self.split == 'train':
+    if self.split == 'train' or not self.split:
       self.train_dataset = SemanticKitti(root=self.root,
                                          sequences=self.train_sequences,
                                          labels=self.labels,
                                          color_map=self.color_map,
                                          learning_map=self.learning_map,
                                          learning_map_inv=self.learning_map_inv,
-                                         sensor=self.sensor,
+                                         dataset_config=self.dataset_config,
                                          max_points=max_points,
                                          transform=True, # set to True to augment the data
                                          gt=self.gt)
@@ -446,7 +458,7 @@ class Parser():
                                          color_map=self.color_map,
                                          learning_map=self.learning_map,
                                          learning_map_inv=self.learning_map_inv,
-                                         sensor=self.sensor,
+                                         dataset_config=self.dataset_config,
                                          max_points=max_points,
                                          gt=self.gt)
 
@@ -458,14 +470,14 @@ class Parser():
       assert len(self.validloader) > 0
       self.validiter = iter(self.validloader)
 
-    if self.split == 'valid':
+    if self.split == 'valid' or not self.split:
       self.valid_dataset = SemanticKitti(root=self.root,
                                          sequences=self.valid_sequences,
                                          labels=self.labels,
                                          color_map=self.color_map,
                                          learning_map=self.learning_map,
                                          learning_map_inv=self.learning_map_inv,
-                                         sensor=self.sensor,
+                                         dataset_config=self.dataset_config,
                                          max_points=max_points,
                                          gt=self.gt)
   
@@ -477,7 +489,7 @@ class Parser():
       assert len(self.validloader) > 0
       self.validiter = iter(self.validloader)
     
-    if self.split == 'test':
+    if self.split == 'test' or not self.split:
       if self.test_sequences:
         self.test_dataset = SemanticKitti(root=self.root,
                                           sequences=self.test_sequences,
@@ -485,7 +497,7 @@ class Parser():
                                           color_map=self.color_map,
                                           learning_map=self.learning_map,
                                           learning_map_inv=self.learning_map_inv,
-                                          sensor=self.sensor,
+                                          dataset_config=self.dataset_config,
                                           max_points=max_points,
                                           gt=False)
   

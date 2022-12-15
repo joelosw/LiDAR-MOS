@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python: Current File",
             "type": "python",
@@ -30,6 +31,26 @@
             ],
             "request": "launch",
             "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/train/tasks/semantic/train.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/mos_SalsaNext/train/tasks/semantic",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: infer with args",
+            "type": "python",
+            "args": [
+                "-d",
+                "/home/joe46973/Masterarbeit/data/KITTI/dataset/",
+                "-l",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/infer_log",
+                "-m",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/second_training_log/logs/2022-12-08-11:11",
+               "-s",
+               "valid"
+            ],
+            "request": "launch",
+            "env": {"CUDA_VISIBLE_DEVICES": ""},
+            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/train/tasks/semantic/infer.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/mos_SalsaNext/train/tasks/semantic",
             "justMyCode": false

@@ -114,7 +114,8 @@ if __name__ == '__main__':
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq, "predictions"))
         for seq in DATA["split"]["valid"]:
-            seq = '{0:02d}'.format(int(seq))
+            if not isinstance(seq, str):
+                seq = '{0:02d}'.format(int(seq))
             print("valid", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq, "predictions"))

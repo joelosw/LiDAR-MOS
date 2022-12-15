@@ -46,11 +46,11 @@ class User():
                                       color_map=self.DATA["color_map"],
                                       learning_map=self.DATA["learning_map"],
                                       learning_map_inv=self.DATA["learning_map_inv"],
-                                      sensor=self.ARCH["dataset"]["sensor"],
+                                      dataset_config=self.ARCH["dataset"],
                                       max_points=self.ARCH["dataset"]["max_points"],
                                       batch_size=1,
                                       workers=self.ARCH["train"]["workers"],
-                                      gt=True,
+                                      gt=self.DATA['ground_truth'] if 'ground_truth' in self.DATA.keys() else True,
                                       shuffle_train=False)
 
     # concatenate the encoder and the head
@@ -58,13 +58,15 @@ class User():
         torch.nn.Module.dump_patches = True
         if self.uncertainty:
             self.model = SalsaNextUncertainty(self.parser.get_n_classes())
-            self.model = nn.DataParallel(self.model)
+            if torch.cuda.is_available() and torch.cuda.device_count() > 1:
+              self.model = nn.DataParallel(self.model)
             w_dict = torch.load(modeldir + "/SalsaNext_valid_best",
                                 map_location=lambda storage, loc: storage)
             self.model.load_state_dict(w_dict['state_dict'], strict=True)
         else:
             self.model = SalsaNext(self.parser.get_n_classes(), ARCH)
-            self.model = nn.DataParallel(self.model)
+            if torch.cuda.is_available() and torch.cuda.device_count() > 1:
+              self.model = nn.DataParallel(self.model)
             w_dict = torch.load(modeldir + "/SalsaNext_valid_best",
                                 map_location=lambda storage, loc: storage)
             self.model.load_state_dict(w_dict['state_dict'], strict=True)
@@ -132,7 +134,7 @@ class User():
       end = time.time()
 
       for i, (proj_in, proj_mask, _, _, path_seq, path_name, p_x, p_y, proj_range, unproj_range, _, _, _, _, npoints) in enumerate(loader):
-        # first cut to rela size (batch size one allows it)
+        # first cut to real size (batch size one allows it)
         p_x = p_x[0, :npoints]
         p_y = p_y[0, :npoints]
         proj_range = proj_range[0, :npoints]

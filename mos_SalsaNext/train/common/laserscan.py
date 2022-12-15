@@ -118,8 +118,11 @@ class LaserScan:
         if remissions is not None and not isinstance(remissions, np.ndarray):
             raise TypeError("Remissions should be numpy array")
 
+
         # put in attribute
-        self.points = points  # get
+        valid_idx = np.all(~(points[:] == [0,0,0]), axis=-1)
+        self.points = points[valid_idx]
+
         if self.flip_sign:
             self.points[:, 1] = -self.points[:, 1]
         if self.DA:
@@ -132,7 +135,7 @@ class LaserScan:
         if self.rot:
             self.points = self.points @ R.random(random_state=1234).as_dcm().T
         if remissions is not None:
-            self.remissions = remissions  # get remission
+            self.remissions = remissions[valid_idx]  # get remission
             #if self.DA:
             #    self.remissions = self.remissions[::-1].copy()
         else:

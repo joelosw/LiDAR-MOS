@@ -93,9 +93,11 @@ class LaserScan:
       raise TypeError("Remissions should be numpy array")
 
     # put in attribute
-    self.points = points    # get xyz
+    valid_idx = np.all(~(points[:] == [0,0,0]), axis=-1)
+    self.points = points[valid_idx] # get xyz
+  
     if remissions is not None:
-      self.remissions = remissions  # get remission
+      self.remissions = remissions[valid_idx]  # get remission
     else:
       self.remissions = np.zeros((points.shape[0]), dtype=np.float32)
 

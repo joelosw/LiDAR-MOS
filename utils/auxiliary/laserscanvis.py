@@ -76,7 +76,7 @@ class LaserScanVis:
     # img canvas size
     self.multiplier = 1
     self.canvas_W = 1024
-    self.canvas_H = 64
+    self.canvas_H = 128
     if self.semantics:
       self.multiplier += 1
     if self.instances:
@@ -180,6 +180,7 @@ class LaserScanVis:
     data = (data - data[data > 0].min()) / \
         (data.max() - data[data > 0].min())
     # print(data.max(), data.min())
+    print(f"Setting Image data of shape: {data.shape}")
     self.img_vis.set_data(data)
     self.img_vis.update()
 

@@ -97,15 +97,16 @@ if __name__ == '__main__':
     quit()
 
   # fix sequence name
-  FLAGS.sequence = '{0:02d}'.format(int(FLAGS.sequence))
+  if not isinstance(FLAGS.sequence, str):
+    FLAGS.sequence = '{0:02d}'.format(int(FLAGS.sequence))
 
   # does sequence folder exist?
   scan_paths = os.path.join(FLAGS.dataset, "sequences",
-                            FLAGS.sequence, "velodyne")
+                            FLAGS.sequence, "o2_sensor_frame_bins")
   if os.path.isdir(scan_paths):
     print("Sequence folder exists! Using sequence from %s" % scan_paths)
   else:
-    print("Sequence folder doesn't exist! Exiting...")
+    print(f"Sequence folder {scan_paths} doesn't exist! Exiting...")
     quit()
 
   # populate the pointclouds
@@ -141,8 +142,12 @@ if __name__ == '__main__':
     scan = LaserScan(project=True)  # project all opened scans to spheric proj
   else:
     color_dict = CFG["color_map"]
+    print(f'Color Dict: {color_dict}')
     nclasses = len(color_dict)
-    scan = SemLaserScan(nclasses, color_dict, project=True)
+    color_dict[0] = [128,128,128]
+    color_dict[1] = [128,128,128]
+    color_dict[9] = [128,128,128]
+    scan = SemLaserScan(nclasses, color_dict, project=True, H=128, fov_up=11.25, fov_down=11.25)
 
   # create a visualizer
   semantics = not FLAGS.ignore_semantics
