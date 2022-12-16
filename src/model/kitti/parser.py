@@ -19,7 +19,7 @@ import types
 from collections.abc import Sequence, Iterable
 import warnings
 
-from kitti.utils import load_poses, load_calib
+from utils.utils import load_poses, load_calib
 
 EXTENSIONS_SCAN = ['.bin']
 EXTENSIONS_LABEL = ['.label']
