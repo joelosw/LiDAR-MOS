@@ -28,9 +28,9 @@
             ],
             "request": "launch",
             "env": {"CUDA_VISIBLE_DEVICES": ""},
-            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/model/infer.py",
+            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/src/infer.py",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/model/",
+            "cwd": "${workspaceFolder}/",
             "justMyCode": false
         },
         {
@@ -46,9 +46,9 @@
 
             ],
             "request": "launch",
-            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/model/train.py",
+            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/src/train.py",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/model",
+            "cwd": "${workspaceFolder}/",
             "justMyCode": false
         },
     ]

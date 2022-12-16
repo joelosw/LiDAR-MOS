@@ -16,8 +16,8 @@ import cv2
 import os
 import numpy as np
 
-from modules.SalsaNext import *
-from modules.SalsaNextUncertainty import *
+from model.modules.SalsaNext import *
+from model.modules.SalsaNextUncertainty import *
 from postproc.KNN import KNN
 
 

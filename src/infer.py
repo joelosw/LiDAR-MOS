@@ -10,7 +10,7 @@ import os
 import shutil
 import __init__ as booger
 
-from modules.user import *
+from model.modules.user import *
 def str2bool(v):
     if isinstance(v, bool):
        return v

@@ -6,8 +6,8 @@ import __init__ as booger
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-#from modules.ConcreteDropout import adf.Dropout
-import modules.adf as adf
+#from src.model.modules.ConcreteDropout import adf.Dropout
+import model.modules.adf as adf
 
 #We need to define the variance. For now we are using the 1e-3 as the authors...
 #Also for the gridsearch im not sure how to use it...

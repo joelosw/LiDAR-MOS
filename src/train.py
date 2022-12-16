@@ -6,14 +6,14 @@ import datetime
 import os
 import shutil
 from shutil import copyfile
-import __init__ as booger
+import model.__init__ as booger
 import yaml
-from modules.trainer import *
+from model.modules.trainer import *
 from pip._vendor.distlib.compat import raw_input
 
-from modules.SalsaNextAdf import *
-from modules.SalsaNext import *
-#from modules.save_dataset_projected import *
+from model.modules.SalsaNextAdf import *
+from model.modules.SalsaNext import *
+#from src.model.modules.save_dataset_projected import *
 import math
 from decimal import Decimal
 

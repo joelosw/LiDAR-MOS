@@ -12,15 +12,16 @@ import torch.nn as nn
 import torch.optim as optim
 from matplotlib import pyplot as plt
 from torch.autograd import Variable
-from common.avgmeter import *
-from common.logger import Logger
-from common.sync_batchnorm.batchnorm import convert_model
-from common.warmupLR import *
-from modules.ioueval import *
-from modules.SalsaNext import *
-from modules.SalsaNextAdf import *
-from modules.Lovasz_Softmax import Lovasz_softmax
-import modules.adf as adf
+
+from utils.avgmeter import *
+from utils.logger import Logger
+from utils.sync_batchnorm.batchnorm import convert_model
+from utils.warmupLR import *
+from model.modules.ioueval import *
+from model.modules.SalsaNext import *
+from model.modules.SalsaNextAdf import *
+from model.modules.Lovasz_Softmax import Lovasz_softmax
+import model.modules.adf as adf
 
 def keep_variance_fn(x):
     return x + 1e-3
@@ -87,7 +88,7 @@ class Trainer():
                      "best_val_iou": 0}
 
         # get the data
-        print(f'Train path: {os.path.join(os.getcwd(), booger.TRAIN_PATH)}')
+        print(f'Train path: {os.path.join(os.getcwd(), booger.TRAIN_PATH)}' + self.CONFIG['labels']["name"] + '/parser.py')
         parserModule = imp.load_source("parserModule",
                                        booger.TRAIN_PATH +
                                        self.CONFIG['labels']["name"] + '/parser.py')

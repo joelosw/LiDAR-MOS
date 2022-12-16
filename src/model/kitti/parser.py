@@ -2,7 +2,7 @@ import os
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from common.laserscan import LaserScan, SemLaserScan
+from utils.laserscan import LaserScan, SemLaserScan
 import torchvision
 
 import torch
