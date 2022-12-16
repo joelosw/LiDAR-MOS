@@ -54,6 +54,24 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/mos_SalsaNext/train/tasks/semantic",
             "justMyCode": false
-        }
+        },
+        {
+            "name": "Python: training with args - master_config",
+            "type": "python",
+            "args": [
+                "-c",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/config/master_config.yml",
+                "-l",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/second_training_log",
+                "-u",
+                "false"
+
+            ],
+            "request": "launch",
+            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/model/train/tasks/semantic/train.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/model/train/tasks/semantic",
+            "justMyCode": false
+        },
     ]
 }
