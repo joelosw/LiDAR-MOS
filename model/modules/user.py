@@ -22,11 +22,9 @@ from postproc.KNN import KNN
 
 
 class User():
-  def __init__(self, ARCH, DATA, datadir, logdir, modeldir,split,uncertainty,mc=30):
+  def __init__(self, CONFIG, logdir, modeldir,split,uncertainty,mc=30):
     # parameters
-    self.ARCH = ARCH
-    self.DATA = DATA
-    self.datadir = datadir
+    self.CONFIG = CONFIG
     self.logdir = logdir
     self.modeldir = modeldir
     self.uncertainty = uncertainty
@@ -35,22 +33,21 @@ class User():
 
     # get the data
     parserModule = imp.load_source("parserModule",
-                                   booger.TRAIN_PATH + '/dataset/' +
-                                   self.DATA["name"] + '/parser.py')
-    self.parser = parserModule.Parser(root=self.datadir,
-                                      train_sequences=self.DATA["split"]["train"],
-                                      valid_sequences=self.DATA["split"]["valid"],
-                                      test_sequences=self.DATA["split"]["test"],
+                                   booger.TRAIN_PATH +
+                                   self.CONFIG['labels']["name"] + '/parser.py')
+    self.parser = parserModule.Parser(root=self.CONFIG['dataset']['root_folder'],
+                                      train_sequences=self.CONFIG["split"]["train"],
+                                      valid_sequences=self.CONFIG["split"]["valid"],
+                                      test_sequences=self.CONFIG["split"]["test"],
                                       split = self.split,
-                                      labels=self.DATA["labels"],
-                                      color_map=self.DATA["color_map"],
-                                      learning_map=self.DATA["learning_map"],
-                                      learning_map_inv=self.DATA["learning_map_inv"],
-                                      dataset_config=self.ARCH["dataset"],
-                                      max_points=self.ARCH["dataset"]["max_points"],
+                                      labels=self.CONFIG["labels"],
+                                      color_map=self.CONFIG['labels']["color_map"],
+                                      learning_map=self.CONFIG['labels']["learning_map"],
+                                      learning_map_inv=self.CONFIG['labels']["learning_map_inv"],
+                                      dataset_config=self.CONFIG["dataset"],
                                       batch_size=1,
-                                      workers=self.ARCH["train"]["workers"],
-                                      gt=self.DATA['ground_truth'] if 'ground_truth' in self.DATA.keys() else True,
+                                      workers=self.CONFIG["train"]["workers"],
+                                      gt=self.CONFIG['infer']['ground_truth'] if 'infer' in self.CONFIG.keys() else True,
                                       shuffle_train=False)
 
     # concatenate the encoder and the head
@@ -64,7 +61,7 @@ class User():
                                 map_location=lambda storage, loc: storage)
             self.model.load_state_dict(w_dict['state_dict'], strict=True)
         else:
-            self.model = SalsaNext(self.parser.get_n_classes(), ARCH)
+            self.model = SalsaNext(self.parser.get_n_classes(), len(CONFIG['residual_images']['num_last_n']))
             if torch.cuda.is_available() and torch.cuda.device_count() > 1:
               self.model = nn.DataParallel(self.model)
             w_dict = torch.load(modeldir + "/SalsaNext_valid_best",
@@ -73,8 +70,8 @@ class User():
 
     # use knn post processing?
     self.post = None
-    if self.ARCH["post"]["KNN"]["use"]:
-      self.post = KNN(self.ARCH["post"]["KNN"]["params"],
+    if self.CONFIG["post"]["KNN"]["use"]:
+      self.post = KNN(self.CONFIG["post"]["KNN"]["params"],
                       self.parser.get_n_classes())
 
     # GPU?

@@ -26,12 +26,6 @@ if __name__ == '__main__':
     splits = ["train", "valid", "test"]
     parser = argparse.ArgumentParser("./infer.py")
     parser.add_argument(
-        '--dataset', '-d',
-        type=str,
-        required=True,
-        help='Dataset to train with. No Default',
-    )
-    parser.add_argument(
         '--log', '-l',
         type=str,
         default=os.path.expanduser("~") + '/logs/' +
@@ -73,7 +67,6 @@ if __name__ == '__main__':
     # print summary of what we will do
     print("----------")
     print("INTERFACE:")
-    print("dataset", FLAGS.dataset)
     print("log", FLAGS.log)
     print("model", FLAGS.model)
     print("Uncertainty", FLAGS.uncertainty)
@@ -86,20 +79,11 @@ if __name__ == '__main__':
 
     # open arch config file
     try:
-        print("Opening arch config file from %s" % FLAGS.model)
-        ARCH = yaml.safe_load(open(FLAGS.model + "/arch_cfg.yaml", 'r'))
+        print("Opening config file from %s" % FLAGS.model)
+        CONFIG = yaml.safe_load(open(FLAGS.model + "/config.yml", 'r'))
     except Exception as e:
         print(e)
-        print("Error opening arch yaml file.")
-        quit()
-
-    # open data config file
-    try:
-        print("Opening data config file from %s" % FLAGS.model)
-        DATA = yaml.safe_load(open(FLAGS.model + "/data_cfg.yaml", 'r'))
-    except Exception as e:
-        print(e)
-        print("Error opening data yaml file.")
+        print("Error opening config yaml file.")
         quit()
 
     # create log folder
@@ -108,18 +92,18 @@ if __name__ == '__main__':
             shutil.rmtree(FLAGS.log)
         os.makedirs(FLAGS.log)
         os.makedirs(os.path.join(FLAGS.log, "sequences"))
-        for seq in DATA["split"]["train"]:
+        for seq in CONFIG["split"]["train"]:
             seq = '{0:02d}'.format(int(seq))
             print("train", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq, "predictions"))
-        for seq in DATA["split"]["valid"]:
+        for seq in CONFIG["split"]["valid"]:
             if not isinstance(seq, str):
                 seq = '{0:02d}'.format(int(seq))
             print("valid", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq, "predictions"))
-        for seq in DATA["split"]["test"]:
+        for seq in CONFIG["split"]["test"]:
             seq = '{0:02d}'.format(int(seq))
             print("test", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
@@ -142,5 +126,5 @@ if __name__ == '__main__':
         quit()
 
     # create user and infer dataset
-    user = User(ARCH, DATA, FLAGS.dataset, FLAGS.log, FLAGS.model,FLAGS.split,FLAGS.uncertainty,FLAGS.monte_carlo)
+    user = User(CONFIG, FLAGS.log, FLAGS.model,FLAGS.split,FLAGS.uncertainty,FLAGS.monte_carlo)
     user.infer()
