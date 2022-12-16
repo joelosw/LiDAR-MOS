@@ -120,7 +120,8 @@ class LaserScan:
 
 
         # put in attribute
-        valid_idx = np.all(~(points[:] == [0,0,0]), axis=-1)
+        valid_idx = np.all(~(points[:] == [-1,-1,-1]), axis=-1)
+        #valid_idx = range(len(points))
         self.points = points[valid_idx]
 
         if self.flip_sign:

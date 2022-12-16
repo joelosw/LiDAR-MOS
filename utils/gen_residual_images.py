@@ -8,6 +8,7 @@ import sys
 import yaml
 import numpy as np
 from tqdm import tqdm
+from tqdm.auto import trange
 import matplotlib.pyplot as plt
 import cv2
 
@@ -21,8 +22,8 @@ except:
   from utils import range_projection
 
 
-def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folder, visualization_folder, range_image_params ): 
-  print(f'Looking for poses in {pose_file}')
+def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folder, visualization_folder, range_image_params, num_last_n): 
+  #print(f'Looking for poses in {pose_file}')
   poses = np.array(load_poses(pose_file))
   inv_frame0 = np.linalg.inv(poses[0])
   
@@ -44,7 +45,8 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
   
   # test for the first N scans
   if num_frames >= len(poses) or num_frames <= 0:
-    print('generate training data for all frames with number of: ', len(poses))
+    #print('generate training data for all frames with number of: ', len(poses))
+    pass
   else:
     poses = poses[:num_frames]
     scan_paths = scan_paths[:num_frames]
@@ -52,7 +54,7 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
   
   
   # generate residual images for the whole sequence
-  for frame_idx in tqdm(range(len(scan_paths))):
+  for frame_idx in trange(len(scan_paths), desc="Frames in sequence"):
     file_name = os.path.join(residual_image_folder, str(frame_idx).zfill(6))
     diff_image = np.full((range_image_params['height'], range_image_params['width']), 0,
                              dtype=np.float32)  # [H,W] range (0 is no data)
@@ -144,36 +146,37 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
 
 if __name__ == '__main__':
   # load config file
-  config_filename = 'config/data_preparing.yaml'
+  config_filename = 'config/master_config.yml'
   if len(sys.argv) > 1:
     config_filename = sys.argv[1]
   
-  if yaml.__version__ >= '5.1':
-    config = yaml.load(open(config_filename), Loader=yaml.FullLoader)
-  else:
-    config = yaml.load(open(config_filename))
-  
-  for num_seq in config['seqs']:
-    # specify parameters
-    num_frames = config['num_frames']
-    debug = config['debug']
-    normalize = config['normalize']
-    num_last_n = config['num_last_n']
-    visualize = config['visualize']
-    visualization_folder = config['visualization_folder'].replace('SEQ_NUM', str(num_seq))
-    
-    # specify the output folders
-    residual_image_folder = config['residual_image_folder'].replace('SEQ_NUM', str(num_seq))
-    if not os.path.exists(residual_image_folder):
-      os.makedirs(residual_image_folder)
+  master_config = yaml.load(open(config_filename), Loader=yaml.FullLoader)
+
+  res_config = master_config['residual_images']
+  for num_last_n_idx in trange(len(res_config['num_last_n']), desc="num_last_n"):
+    for seq_idx in trange(len(res_config['seqs']), desc="Sequence in Num_last_n"):
+      # specify parameters
+      seq_num = res_config['seqs'][seq_idx]
+      num_frames = res_config['num_frames']
+      debug = res_config['debug']
+      normalize = res_config['normalize']
+      num_last_n = res_config['num_last_n'][num_last_n_idx]
+      visualize = res_config['visualize']
+      visualization_folder = res_config['visualization_folder'].replace('SEQ_NUM', str(seq_num))
       
-    if visualize:
-      if not os.path.exists(visualization_folder):
-        os.makedirs(visualization_folder)
-    
-    # load poses
-    pose_file = config['pose_file'].replace('SEQ_NUM', str(num_seq))
-    calib_file = config['calib_file'].replace('SEQ_NUM', str(num_seq))
-    scan_folder = config['scan_folder'].replace('SEQ_NUM', str(num_seq))
-    range_image_params = config['range_image']
-    generate_res_images(pose_file, calib_file, scan_folder, residual_image_folder, visualization_folder, range_image_params)
+      # specify the output folders
+      residual_image_folder = res_config['residual_image_folder'].replace('SEQ_NUM', str(seq_num))
+      if not os.path.exists(residual_image_folder):
+        os.makedirs(residual_image_folder)
+        
+      if visualize:
+        if not os.path.exists(visualization_folder):
+          os.makedirs(visualization_folder)
+      
+      # load poses
+      root_path = master_config['dataset']['root_folder']
+      pose_file = os.path.join(root_path,seq_num,master_config['dataset']['pose_file'])
+      calib_file = os.path.join(root_path,seq_num,master_config['dataset']['calib_file'])
+      scan_folder = os.path.join(root_path,seq_num,master_config['dataset']['scan_folder'])
+      range_image_params = master_config['dataset']['sensor']
+      generate_res_images(pose_file, calib_file, scan_folder, residual_image_folder, visualization_folder, range_image_params, num_last_n)
