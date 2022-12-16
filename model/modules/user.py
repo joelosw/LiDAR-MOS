@@ -16,9 +16,9 @@ import cv2
 import os
 import numpy as np
 
-from tasks.semantic.modules.SalsaNext import *
-from tasks.semantic.modules.SalsaNextUncertainty import *
-from tasks.semantic.postproc.KNN import KNN
+from modules.SalsaNext import *
+from modules.SalsaNextUncertainty import *
+from postproc.KNN import KNN
 
 
 class User():
@@ -35,7 +35,7 @@ class User():
 
     # get the data
     parserModule = imp.load_source("parserModule",
-                                   booger.TRAIN_PATH + '/tasks/semantic/dataset/' +
+                                   booger.TRAIN_PATH + '/dataset/' +
                                    self.DATA["name"] + '/parser.py')
     self.parser = parserModule.Parser(root=self.datadir,
                                       train_sequences=self.DATA["split"]["train"],

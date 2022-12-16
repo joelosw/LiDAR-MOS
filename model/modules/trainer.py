@@ -16,11 +16,11 @@ from common.avgmeter import *
 from common.logger import Logger
 from common.sync_batchnorm.batchnorm import convert_model
 from common.warmupLR import *
-from tasks.semantic.modules.ioueval import *
-from tasks.semantic.modules.SalsaNext import *
-from tasks.semantic.modules.SalsaNextAdf import *
-from tasks.semantic.modules.Lovasz_Softmax import Lovasz_softmax
-import tasks.semantic.modules.adf as adf
+from modules.ioueval import *
+from modules.SalsaNext import *
+from modules.SalsaNextAdf import *
+from modules.Lovasz_Softmax import Lovasz_softmax
+import modules.adf as adf
 
 def keep_variance_fn(x):
     return x + 1e-3
@@ -87,8 +87,9 @@ class Trainer():
                      "best_val_iou": 0}
 
         # get the data
+        print(f'Train path: {os.path.join(os.getcwd(), booger.TRAIN_PATH)}')
         parserModule = imp.load_source("parserModule",
-                                       booger.TRAIN_PATH + '/tasks/semantic/dataset/' +
+                                       booger.TRAIN_PATH +
                                        self.CONFIG['labels']["name"] + '/parser.py')
         self.parser = parserModule.Parser(root=self.datadir,
                                           train_sequences=self.CONFIG["split"]["train"],

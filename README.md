@@ -101,13 +101,13 @@ Note that, we use pytorch v1.5.1+cu101 which is different from the original one.
 #### Inferring
 To generate the LiDAR-MOS predictions with pretrained model with one residual image ([download](https://www.ipb.uni-bonn.de/html/projects/LiDAR-MOS/model_salsanext_residual_1.zip), please `unzip` before using). Quick test on toy dataset, directly run
 ```sh
-  $ cd mos_SalsaNext/train/tasks/semantic
+  $ cd mos_SalsaNext/train/
   $ python3 infer.py -d ../../../../data -m ../../../../data/model_salsanext_residual_1 -l ../../../../data/predictions_salsanext_residual_1_new -s valid
 ```
 
 Inferring the whole dataset, please download the KITTI-Odometry dataset from the [original website](https://www.cvlibs.net/datasets/kitti/eval_odometry.php), and change the corresponding paths.
 ```sh
-  $ cd mos_SalsaNext/train/tasks/semantic
+  $ cd mos_SalsaNext/train/
   $ python3 infer.py -d path/to/kitti/dataset -m path/to/pretrained_model -l path/to/log -s train/valid/test # depending of desired split to evaluate
 ```
 
@@ -115,7 +115,7 @@ Inferring the whole dataset, please download the KITTI-Odometry dataset from the
 To train a LiDAR-MOS network with SalsaNext from scratch, one has to download the [KITTI-Odometry dataset](https://www.cvlibs.net/datasets/kitti/eval_odometry.php) and [Semantic-Kitti dataset](http://semantic-kitti.org/):
 Change the corresponding paths and run:
 ```sh
-  $ cd mos_SalsaNext/train/tasks/semantic
+  $ cd mos_SalsaNext/train/
   $ ./train.sh -d path/to/kitti/dataset -a salsanext_mos.yml -l path/to/log -c 0  # the number of used gpu cores
 ```
 
@@ -125,7 +125,7 @@ To use RangeNet++ as the baseline segmentation network for LiDAR-MOS, one should
 #### Inferring
 Inferring the whole dataset, please download the KITTI-Odometry dataset from the [original website](https://www.cvlibs.net/datasets/kitti/eval_odometry.php), the [pretrained model](https://www.ipb.uni-bonn.de/html/projects/LiDAR-MOS/model_rangenet_residual_1.zip) and change the corresponding paths.
 ```sh
-  $ cd mos_RangeNet/tasks/semantic
+  $ cd mos_RangeNet/
   $ python3 infer.py -d path/to/kitti/dataset -m path/to/pretrained_model -l path/to/log -s train/valid/test # depending of desired split to evaluate
 ```
 
@@ -133,7 +133,7 @@ Inferring the whole dataset, please download the KITTI-Odometry dataset from the
 To train a LiDAR-MOS network with RangeNet++ from scratch, one has to download the [KITTI-Odometry dataset](https://www.cvlibs.net/datasets/kitti/eval_odometry.php) and [Semantic-Kitti dataset](http://semantic-kitti.org/) and
 change the corresponding paths and run:
 ```sh
-  $ cd mos_RangeNet/tasks/semantic
+  $ cd mos_RangeNet/
   $ python3 train.py -d path/to/kitti/dataset -ac rangenet_mos.yaml -l path/to/log
 ```
 

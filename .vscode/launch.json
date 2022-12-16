@@ -14,45 +14,23 @@
             "justMyCode": true
         },
         {
-            "name": "Python: training with args",
-            "type": "python",
-            "args": [
-                "-d",
-                "/home/joe46973/Masterarbeit/data/KITTI/dataset/",
-                "-ac",
-                "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/salsanext_mos.yml",
-                "-l",
-                "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/second_training_log",
-                "-p",
-                "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/second_training_log/logs/2022-12-08-10:19",
-                "-u",
-                "false"
-
-            ],
-            "request": "launch",
-            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/train/tasks/semantic/train.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/mos_SalsaNext/train/tasks/semantic",
-            "justMyCode": false
-        },
-        {
             "name": "Python: infer with args",
             "type": "python",
             "args": [
                 "-d",
                 "/home/joe46973/Masterarbeit/data/KITTI/dataset/",
                 "-l",
-                "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/infer_log",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/infer_log",
                 "-m",
-                "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/second_training_log/logs/2022-12-08-11:11",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/second_training_log/logs/2022-12-08-11:11",
                "-s",
                "valid"
             ],
             "request": "launch",
             "env": {"CUDA_VISIBLE_DEVICES": ""},
-            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/mos_SalsaNext/train/tasks/semantic/infer.py",
+            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/model/infer.py",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/mos_SalsaNext/train/tasks/semantic",
+            "cwd": "${workspaceFolder}/model/",
             "justMyCode": false
         },
         {
@@ -68,9 +46,9 @@
 
             ],
             "request": "launch",
-            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/model/train/tasks/semantic/train.py",
+            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/model/train.py",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/model/train/tasks/semantic",
+            "cwd": "${workspaceFolder}/model",
             "justMyCode": false
         },
     ]
