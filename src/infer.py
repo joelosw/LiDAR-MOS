@@ -26,6 +26,12 @@ if __name__ == '__main__':
     splits = ["train", "valid", "test"]
     parser = argparse.ArgumentParser("./infer.py")
     parser.add_argument(
+        '--config', '-cfg',
+        type=str,
+        default=None,
+        help='Which config to use. Use Config in model/ if no other specified'
+    )
+    parser.add_argument(
         '--log', '-l',
         type=str,
         default=os.path.expanduser("~") + '/logs/' +
@@ -78,9 +84,13 @@ if __name__ == '__main__':
     print("----------\n")
 
     # open arch config file
+    if FLAGS.config is None:
+        config_path = FLAGS.model + "/config.yml"
+    else:
+        config_path = FLAGS.config
     try:
         print("Opening config file from %s" % FLAGS.model)
-        CONFIG = yaml.safe_load(open(FLAGS.model + "/config.yml", 'r'))
+        CONFIG = yaml.safe_load(open(config_path, 'r'))
     except Exception as e:
         print(e)
         print("Error opening config yaml file.")
@@ -93,18 +103,23 @@ if __name__ == '__main__':
         os.makedirs(FLAGS.log)
         os.makedirs(os.path.join(FLAGS.log, "sequences"))
         for seq in CONFIG["split"]["train"]:
-            seq = '{0:02d}'.format(int(seq))
+            if seq is None: continue
+            if not isinstance(seq, str):
+                seq = '{0:02d}'.format(int(seq))
             print("train", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq, "predictions"))
         for seq in CONFIG["split"]["valid"]:
+            if seq is None: continue
             if not isinstance(seq, str):
                 seq = '{0:02d}'.format(int(seq))
             print("valid", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq, "predictions"))
         for seq in CONFIG["split"]["test"]:
-            seq = '{0:02d}'.format(int(seq))
+            if seq is None: continue
+            if not isinstance(seq, str):
+                seq = '{0:02d}'.format(int(seq))
             print("test", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq, "predictions"))
@@ -112,11 +127,6 @@ if __name__ == '__main__':
         print(e)
         print("Error creating log directory. Check permissions!")
         raise
-
-    except Exception as e:
-        print(e)
-        print("Error creating log directory. Check permissions!")
-        quit()
 
     # does model folder exist?
     if os.path.isdir(FLAGS.model):

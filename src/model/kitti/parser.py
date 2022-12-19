@@ -279,7 +279,8 @@ class SemanticKitti(Dataset):
                             fov_down=self.sensor_fov_down,
                             DA=DA,
                             flip_sign=flip_sign,
-                            drop_points=drop_points)
+                            drop_points=drop_points,
+                            filter=self.dataset_config['filter_points'])
       else:
         scan = LaserScan(project=True,
                          H=self.sensor_img_H,
@@ -289,7 +290,8 @@ class SemanticKitti(Dataset):
                          DA=DA,
                          rot=rot,
                          flip_sign=flip_sign,
-                         drop_points=drop_points)
+                         drop_points=drop_points,
+                         filter=self.dataset_config['filter_points'])
   
       # open and obtain (transformed) scan
       scan.open_scan(scan_file, index_pose, current_pose, if_transform=self.transform_mod)

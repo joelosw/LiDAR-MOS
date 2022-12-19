@@ -121,7 +121,9 @@ class LaserScan:
 
 
         # put in attribute
-        self.valid_idx = np.all(~(points[:] == [-1,-1,-1]), axis=-1)
+
+        self.valid_idx = ~np.any([np.all(points[:] == [-1,-1,-1],axis=-1),np.all(points[:] == [0,0,0], axis=-1)], axis=0)
+
         #valid_idx = range(len(points))
         if not np.all(self.valid_idx) and self.filter:
             print(f'Filtering Out {np.sum(~self.valid_idx)} points from laserscan')
@@ -141,7 +143,10 @@ class LaserScan:
         if self.rot:
             self.points = self.points @ R.random(random_state=1234).as_dcm().T
         if remissions is not None:
-            self.remissions = remissions[self.valid_idx]  # get remission
+            if not np.all(self.valid_idx) and self.filter:
+                self.remissions = remissions[self.valid_idx]  # get remission
+            else:
+                self.remissions = remissions
             #if self.DA:
             #    self.remissions = self.remissions[::-1].copy()
         else:
@@ -218,8 +223,8 @@ class SemLaserScan(LaserScan):
     """Class that contains LaserScan with x,y,z,r,sem_label,sem_color_label,inst_label,inst_color_label"""
     EXTENSIONS_LABEL = ['.label']
 
-    def __init__(self, sem_color_dict=None, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0, max_classes=300,DA=False,flip_sign=False,drop_points=False):
-        super(SemLaserScan, self).__init__(project, H, W, fov_up, fov_down,DA=DA,flip_sign=flip_sign,drop_points=drop_points)
+    def __init__(self, sem_color_dict=None, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0, max_classes=300,DA=False,flip_sign=False,drop_points=False, filter=False):
+        super(SemLaserScan, self).__init__(project, H, W, fov_up, fov_down,DA=DA,flip_sign=flip_sign,drop_points=drop_points, filter=filter)
         self.reset()
 
         # make semantic colors
@@ -301,7 +306,7 @@ class SemLaserScan(LaserScan):
         if not isinstance(label, np.ndarray):
             raise TypeError("Label should be numpy array")
 
-        if not np.all(self.valid_idx)and self.filter:
+        if not np.all(self.valid_idx)and self.filter and np.sum(self.valid_idx) < label.shape[0]:
             label = label[self.valid_idx]
         # only fill in attribute if the right size
         if label.shape[0] == self.points.shape[0]:

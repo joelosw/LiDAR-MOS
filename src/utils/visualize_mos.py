@@ -140,7 +140,7 @@ if __name__ == '__main__':
     color_dict[0] = [128,128,128]
     color_dict[9] = [255,255,255]
     color_dict[251] = [0,0,255]
-    scan = SemLaserScan(sem_color_dict=color_dict, project=True, H=128, fov_up=11.25, fov_down=11.25)
+    scan = SemLaserScan(sem_color_dict=color_dict, project=True, H=CFG['dataset']['sensor']['height'], fov_up=11.25, fov_down=11.25,filter=CFG['dataset']['filter_points'])
 
   # create a visualizer
   semantics = not FLAGS.ignore_semantics

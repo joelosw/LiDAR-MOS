@@ -69,5 +69,17 @@
             "cwd": "${workspaceFolder}/",
             "justMyCode": false
         },
+        {
+            "name": "Python: gen residual images - modissa",
+            "type": "python",
+            "args": [
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/config/master_config_modissa.yml"
+            ],
+            "request": "launch",
+            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/src/utils/gen_residual_images.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/",
+            "justMyCode": false
+        },
     ]
 }
