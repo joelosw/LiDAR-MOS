@@ -11,7 +11,7 @@ class LaserScan:
     """Class that contains LaserScan with x,y,z,r"""
     EXTENSIONS_SCAN = ['.bin']
 
-    def __init__(self, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0,DA=False,flip_sign=False,rot=False,drop_points=False):
+    def __init__(self, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0,DA=False,flip_sign=False,rot=False,drop_points=False, filter=False):
         self.project = project
         self.proj_H = H
         self.proj_W = W
@@ -21,6 +21,7 @@ class LaserScan:
         self.flip_sign = flip_sign
         self.rot = rot
         self.drop_points = drop_points
+        self.filter = filter
 
         self.reset()
 
@@ -64,7 +65,7 @@ class LaserScan:
     def __len__(self):
         return self.size()
 
-    def open_scan(self, filename, from_pose, to_pose, if_transform=True):
+    def open_scan(self, filename, from_pose, to_pose, if_transform=False):
         """ Open raw scan and fill in attributes
         """
         # reset just in case there was an open structure
@@ -122,9 +123,11 @@ class LaserScan:
         # put in attribute
         self.valid_idx = np.all(~(points[:] == [-1,-1,-1]), axis=-1)
         #valid_idx = range(len(points))
-        if not np.all(self.valid_idx):
+        if not np.all(self.valid_idx) and self.filter:
             print(f'Filtering Out {np.sum(~self.valid_idx)} points from laserscan')
-        self.points = points[self.valid_idx]
+            self.points = points[self.valid_idx]
+        else:
+            self.points = points
 
         if self.flip_sign:
             self.points[:, 1] = -self.points[:, 1]
@@ -298,7 +301,7 @@ class SemLaserScan(LaserScan):
         if not isinstance(label, np.ndarray):
             raise TypeError("Label should be numpy array")
 
-        if not np.all(self.valid_idx):
+        if not np.all(self.valid_idx)and self.filter:
             label = label[self.valid_idx]
         # only fill in attribute if the right size
         if label.shape[0] == self.points.shape[0]:

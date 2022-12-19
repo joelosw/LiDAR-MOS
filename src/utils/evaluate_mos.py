@@ -49,10 +49,10 @@ if __name__ == '__main__':
       str(backends) + ' Defaults to %(default)s',
   )
   parser.add_argument(
-      '--datacfg', '-dc',
+      '--config', '-c',
       type=str,
       required=False,
-      default="config/semantic-kitti-mos.yaml",
+      default="config/master_config.yml",
       help='Dataset config file. Defaults to %(default)s',
   )
   parser.add_argument(
@@ -86,7 +86,7 @@ if __name__ == '__main__':
   print("Predictions: ", FLAGS.predictions)
   print("Backend: ", FLAGS.backend)
   print("Split: ", FLAGS.split)
-  print("Config: ", FLAGS.datacfg)
+  print("Config: ", FLAGS.config)
   print("Limit: ", FLAGS.limit)
   print("Codalab: ", FLAGS.codalab)
   print("*" * 80)
@@ -97,14 +97,14 @@ if __name__ == '__main__':
   # assert backend
   assert(FLAGS.backend in backends)
 
-  print("Opening data config file %s" % FLAGS.datacfg)
-  DATA = yaml.safe_load(open(FLAGS.datacfg, 'r'))
+  print("Opening data config file %s" % FLAGS.config)
+  DATA = yaml.safe_load(open(FLAGS.config, 'r'))
 
   # get number of interest classes, and the label mappings
-  class_strings = DATA["labels"]
-  class_remap = DATA["learning_map"]
-  class_inv_remap = DATA["learning_map_inv"]
-  class_ignore = DATA["learning_ignore"]
+  class_strings = DATA["labels"]["labels"]
+  class_remap = DATA["labels"]["learning_map"]
+  class_inv_remap = DATA["labels"]["learning_map_inv"]
+  class_ignore = DATA["labels"]["learning_ignore"]
   nr_classes = len(class_inv_remap)
 
   # make lookup table for mapping
@@ -142,7 +142,7 @@ if __name__ == '__main__':
   label_names = []
   for sequence in test_sequences:
     sequence = '{0:02d}'.format(int(sequence))
-    label_paths = os.path.join(FLAGS.dataset, "sequences",
+    label_paths = os.path.join(DATA['dataset']['root_folder'],
                                str(sequence), "labels")
     # populate the label names
     seq_label_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
@@ -196,6 +196,10 @@ if __name__ == '__main__':
       pred = pred[:FLAGS.limit]  # limit to desired length
     pred = remap_lut[pred]       # remap to xentropy format
 
+    #print(f'Label Shape: {label.shape}, Pred Shape: {pred.shape}')
+    if(label.shape != pred.shape):
+      print("Skipping because unequal shape")
+      continue
     # add single scan to evaluation
     evaluator.addBatch(pred, label)
 

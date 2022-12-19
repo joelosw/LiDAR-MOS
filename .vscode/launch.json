@@ -51,5 +51,23 @@
             "cwd": "${workspaceFolder}/",
             "justMyCode": false
         },
+        {
+            "name": "Python: visualize with args - master_config",
+            "type": "python",
+            "args": [
+                "-c",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/config/master_config.yml",
+                "-p",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/infer_log",
+                "-s",
+                "08"
+
+            ],
+            "request": "launch",
+            "program": "/home/joe46973/Masterarbeit/LiDAR-MOS/src/utils/visualize_mos.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/",
+            "justMyCode": false
+        },
     ]
 }

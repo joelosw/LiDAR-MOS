@@ -5,22 +5,16 @@
 import argparse
 import os
 import yaml
-from auxiliary.laserscan import LaserScan, SemLaserScan
-from auxiliary.laserscanvis import LaserScanVis
-
+from laserscan import LaserScan, SemLaserScan
+from laserscanvis import LaserScanVis
+from __init__ import RPATH
 if __name__ == '__main__':
   parser = argparse.ArgumentParser("./visualize.py")
-  parser.add_argument(
-      '--dataset', '-d',
-      type=str,
-      required=True,
-      help='Dataset to visualize. No Default',
-  )
   parser.add_argument(
       '--config', '-c',
       type=str,
       required=False,
-      default="config/semantic-kitti-mos.yaml",
+      default="config/master_config.yml",
       help='Dataset config file. Defaults to %(default)s',
   )
   parser.add_argument(
@@ -77,7 +71,6 @@ if __name__ == '__main__':
   # print summary of what we will do
   print("*" * 80)
   print("INTERFACE:")
-  print("Dataset", FLAGS.dataset)
   print("Config", FLAGS.config)
   print("Sequence", FLAGS.sequence)
   print("Predictions", FLAGS.predictions)
@@ -90,19 +83,19 @@ if __name__ == '__main__':
   # open config file
   try:
     print("Opening config file %s" % FLAGS.config)
-    CFG = yaml.safe_load(open(FLAGS.config, 'r'))
+    CFG = yaml.safe_load(open(os.path.join(RPATH,FLAGS.config), 'r'))
   except Exception as e:
     print(e)
     print("Error opening yaml file.")
     quit()
-
   # fix sequence name
   if not isinstance(FLAGS.sequence, str):
     FLAGS.sequence = '{0:02d}'.format(int(FLAGS.sequence))
 
   # does sequence folder exist?
-  scan_paths = os.path.join(FLAGS.dataset, "sequences",
-                            FLAGS.sequence, "o2_sensor_frame_bins")
+
+  scan_paths = os.path.join(CFG['dataset']['root_folder'],
+                            FLAGS.sequence, CFG['dataset']['scan_folder'])
   if os.path.isdir(scan_paths):
     print("Sequence folder exists! Using sequence from %s" % scan_paths)
   else:
@@ -120,7 +113,7 @@ if __name__ == '__main__':
       label_paths = os.path.join(FLAGS.predictions, "sequences",
                                  FLAGS.sequence, "predictions")
     else:
-      label_paths = os.path.join(FLAGS.dataset, "sequences",
+      label_paths = os.path.join(CFG['dataset']['root_folder'],
                                  FLAGS.sequence, "labels")
     if os.path.isdir(label_paths):
       print("Labels folder exists! Using labels from %s" % label_paths)
@@ -141,13 +134,13 @@ if __name__ == '__main__':
   if FLAGS.ignore_semantics:
     scan = LaserScan(project=True)  # project all opened scans to spheric proj
   else:
-    color_dict = CFG["color_map"]
+    color_dict = CFG['labels']["color_map"]
     print(f'Color Dict: {color_dict}')
     nclasses = len(color_dict)
     color_dict[0] = [128,128,128]
-    color_dict[1] = [128,128,128]
-    color_dict[9] = [128,128,128]
-    scan = SemLaserScan(nclasses, color_dict, project=True, H=128, fov_up=11.25, fov_down=11.25)
+    color_dict[9] = [255,255,255]
+    color_dict[251] = [0,0,255]
+    scan = SemLaserScan(sem_color_dict=color_dict, project=True, H=128, fov_up=11.25, fov_down=11.25)
 
   # create a visualizer
   semantics = not FLAGS.ignore_semantics
