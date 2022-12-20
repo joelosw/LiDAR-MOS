@@ -5,6 +5,7 @@ import vispy
 from vispy.scene import visuals, SceneCanvas
 import numpy as np
 from matplotlib import pyplot as plt
+import cv2
 
 
 class LaserScanVis:
@@ -58,7 +59,7 @@ class LaserScanVis:
       self.sem_view.camera = 'turntable'
       self.sem_view.add(self.sem_vis)
       visuals.XYZAxis(parent=self.sem_view.scene)
-      # self.sem_view.camera.link(self.scan_view.camera)
+      self.sem_view.camera.link(self.scan_view.camera)
 
     if self.instances:
       print("Using instances in visualizer")
@@ -73,8 +74,8 @@ class LaserScanVis:
 
     # img canvas size
     self.multiplier = 1
-    self.canvas_W = 1024
-    self.canvas_H = 64
+    self.canvas_W = 2048
+    self.canvas_H = 128
     if self.semantics:
       self.multiplier += 1
     if self.instances:
@@ -83,6 +84,7 @@ class LaserScanVis:
     # new canvas for img
     self.img_canvas = SceneCanvas(keys='interactive', show=True,
                                   size=(self.canvas_W, self.canvas_H * self.multiplier))
+    self.img_canvas.events.resize.connect(self.resize_images)
     # grid
     self.img_grid = self.img_canvas.central_widget.add_grid()
     # interface (n next, b back, q quit, very simple)
@@ -92,6 +94,7 @@ class LaserScanVis:
     # add a view for the depth
     self.img_view = vispy.scene.widgets.ViewBox(
         border_color='white', parent=self.img_canvas.scene)
+    #self.img_view.on_resize(self.resize_images)
     self.img_grid.add_widget(self.img_view, 0, 0)
     self.img_vis = visuals.Image(cmap='viridis')
     self.img_view.add(self.img_vis)
@@ -132,8 +135,8 @@ class LaserScanVis:
 
     # then change names
     title = "scan " + str(self.offset) + " of " + str(len(self.scan_names)-1)
-    self.canvas.title = title
-    self.img_canvas.title = title
+    self.canvas.title = "3D: " + title
+    self.img_canvas.title = "Range: " + title
 
     # then do all the point cloud stuff
 
@@ -168,26 +171,32 @@ class LaserScanVis:
                              edge_color=self.scan.inst_label_color[..., ::-1],
                              size=1)
 
-    # now do all the range image stuff
-    # plot range image
-    data = np.copy(self.scan.proj_range)
-    # print(data[data > 0].max(), data[data > 0].min())
-    data[data > 0] = data[data > 0]**(1 / power)
-    data[data < 0] = data[data > 0].min()
-    # print(data.max(), data.min())
-    data = (data - data[data > 0].min()) / \
-        (data.max() - data[data > 0].min())
-    # print(data.max(), data.min())
-    self.img_vis.set_data(data)
-    self.img_vis.update()
-
-    if self.semantics:
-      self.sem_img_vis.set_data(self.scan.proj_sem_color[..., ::-1])
-      self.sem_img_vis.update()
+    self.resize_images(None)
 
     if self.instances:
       self.inst_img_vis.set_data(self.scan.proj_inst_color[..., ::-1])
       self.inst_img_vis.update()
+
+  def resize_images(self, event):
+    size = self.img_view.size
+    data = np.copy(self.scan.proj_range)
+    # print(data[data > 0].max(), data[data > 0].min())
+    data[data > 0] = data[data > 0]**(1 / 16)
+    data[data < 0] = data[data > 0].min()
+    # print(data.max(), data.min())
+    data = (data - data[data > 0].min()) / \
+        (data.max() - data[data > 0].min())
+    
+    data = cv2.resize(data, dsize=[int(s) for s in size], interpolation=cv2.INTER_CUBIC)
+    
+    self.img_vis.set_data(data)
+    self.img_vis.update()
+    if self.semantics:
+      size = self.sem_img_view.size
+      data_sem = cv2.resize(self.scan.proj_sem_color[..., ::-1], dsize=[int(s) for s in size], interpolation=cv2.INTER_CUBIC)
+      self.sem_img_vis.set_data(data_sem)
+      self.sem_img_vis.update()
+
 
   # interface
   def key_press(self, event):
@@ -203,6 +212,10 @@ class LaserScanVis:
       if self.offset <= 0:
         self.offset = len(self.scan_names)-1
       self.update_scan()
+    elif event.key == 'R':
+      self.img_canvas.size=(self.canvas_W, self.canvas_H * self.multiplier)
+      self.update_scan()
+      
     elif event.key == 'Q' or event.key == 'Escape':
       self.destroy()
 
