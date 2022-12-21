@@ -6,16 +6,15 @@ residual_images:
   # plot images
   debug: False
   # normalize/scale the difference with corresponding range value
-  normalize: True
+  normalize: False
   # use the last n frame to calculate the difference image
-  num_last_n: [1]
+  num_last_n: [1,2,3,4,5]
   seqs: ["Sequence_2"]
 
   # Outputs
-  # the suffix should be the same as num_last_n!
-  residual_image_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/SEQ_NUM/residual_images_1'
+  residual_image_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/SEQ_NUM/residual_images_'
   visualize: True
-  visualization_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/SEQ_NUM/visualization_1'
+  visualization_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/SEQ_NUM/visualization_'
 
 
 ################################################################################
@@ -67,7 +66,7 @@ post:
 # dataset (to find parser)
 dataset:
   root_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/' # where sequences are stored
-  scan_folder: 'o2_modified_kitti_bins'
+  scan_folder: 'o2_not_interpolated_kitti_bins'
   pose_file: 'poses.txt'
   calib_file: 'calib.txt'
   filter_points: True
@@ -283,7 +282,7 @@ split: # sequence numbers
   train:
     - 
   valid:
-    - "Sequence_2"
+    - "Sequence_1"
   test:
     - 
 

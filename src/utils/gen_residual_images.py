@@ -51,7 +51,12 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
     poses = poses[:num_frames]
     scan_paths = scan_paths[:num_frames]
   
-  
+  height = range_image_params['height']
+  width =  range_image_params['width']
+  fov_up = range_image_params['fov_up']
+  fov_down =  range_image_params['fov_down']
+  max_range =  range_image_params['max_range']
+  min_range =  range_image_params['min_range']
   
   # generate residual images for the whole sequence
   for frame_idx in trange(len(scan_paths), desc="Frames in sequence"):
@@ -68,24 +73,19 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
       current_pose = poses[frame_idx]
       current_scan = load_vertex(scan_paths[frame_idx])
       current_range = range_projection(current_scan.astype(np.float32),
-                                       range_image_params['height'], range_image_params['width'],
-                                       range_image_params['fov_up'], range_image_params['fov_down'],
-                                       range_image_params['max_range'], range_image_params['min_range'])[:, :, 3]
+                                       height, width, fov_up, fov_down, max_range, min_range)[:, :, 3].clip(0,max_range)
       
       # load last scan, transform into the current coord and generate a transformed last range image
       last_pose = poses[frame_idx - num_last_n]
       last_scan = load_vertex(scan_paths[frame_idx - num_last_n])
       last_scan_transformed = np.linalg.inv(current_pose).dot(last_pose).dot(last_scan.T).T
-      last_range_transformed = range_projection(last_scan_transformed.astype(np.float32),
-                                                range_image_params['height'], range_image_params['width'],
-                                                range_image_params['fov_up'], range_image_params['fov_down'],
-                                                range_image_params['max_range'], range_image_params['min_range'])[:, :, 3]
+      last_range_transformed = range_projection(last_scan_transformed.astype(np.float32), height, width, fov_up, fov_down, max_range, min_range)[:, :, 3].clip(0,max_range)
       
       # generate residual image
-      valid_mask = (current_range > range_image_params['min_range']) & \
-                   (current_range < range_image_params['max_range']) & \
-                   (last_range_transformed > range_image_params['min_range']) & \
-                   (last_range_transformed < range_image_params['max_range'])
+      valid_mask = (current_range > min_range) & \
+                   (current_range < max_range) & \
+                   (last_range_transformed > min_range) & \
+                   (last_range_transformed < max_range)
       difference = np.abs(current_range[valid_mask] - last_range_transformed[valid_mask])
       
       if normalize:
@@ -108,6 +108,11 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
         axs[2].imshow(diff_image_marked, vmin=0, vmax=10)
         fig.tight_layout()
         plt.show()
+        combined_image = np.concatenate([current_range, last_range_transformed, diff_image],axis=0)
+        plt.imshow(combined_image)
+        plt.show()
+
+
         
       if visualize:
         diff_image_marked = np.zeros(list(last_range_transformed.shape) + [3])
@@ -118,7 +123,7 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
         diff_image_marked[valid_mask,2] = diff_image_scaled[valid_mask]
         image_name = os.path.join(visualization_folder, str(frame_idx).zfill(6) + "_diff.png")
         #cv2.imshow("Bla", (diff_image_marked*255).astype(np.uint8))
-        cv2.imwrite(image_name, (diff_image_marked*255).astype(np.uint8))
+        #cv2.imwrite(image_name, (diff_image_marked*255).astype(np.uint8))
         valid_mask = (current_range > range_image_params['min_range']) & \
                       (current_range < range_image_params['max_range'])
         current_range_scaled = current_range/current_range.max()
@@ -128,17 +133,20 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
         current_image_marked[valid_mask,1] = current_range_scaled[valid_mask]
         current_image_marked[valid_mask,2] = current_range_scaled[valid_mask]
         image_name = os.path.join(visualization_folder, str(frame_idx).zfill(6) + "_current.png")
-        cv2.imwrite(image_name, (current_image_marked*255).astype(np.uint8))
+        #cv2.imwrite(image_name, (current_image_marked*255).astype(np.uint8))
         valid_mask = (last_range_transformed > range_image_params['min_range']) & \
                       (last_range_transformed < range_image_params['max_range'])
-        last_range_transformed_scaled = last_range_transformed/current_range.max()
+        last_range_transformed_scaled = last_range_transformed/last_range_transformed.max()
         transformed_image_marked = np.zeros(list(last_range_transformed.shape) + [3])
         transformed_image_marked[:,:,2] = 0.99
         transformed_image_marked[valid_mask,0] = last_range_transformed_scaled[valid_mask]
         transformed_image_marked[valid_mask,1] = last_range_transformed_scaled[valid_mask]
         transformed_image_marked[valid_mask,2] = last_range_transformed_scaled[valid_mask]
         image_name = os.path.join(visualization_folder, str(frame_idx).zfill(6) + "_transformed.png")
-        cv2.imwrite(image_name, (transformed_image_marked*255).astype(np.uint8))
+        #cv2.imwrite(image_name, (transformed_image_marked*255).astype(np.uint8))
+
+        combined_image = np.concatenate([current_range_scaled*255, last_range_transformed_scaled*255, diff_image_scaled*255],axis=0).astype(np.uint8)
+        cv2.imwrite(os.path.join(visualization_folder, str(frame_idx).zfill(6) + '_combined.png'), combined_image)
 
       # save residual image
       np.save(file_name, diff_image)
@@ -162,10 +170,10 @@ if __name__ == '__main__':
       normalize = res_config['normalize']
       num_last_n = res_config['num_last_n'][num_last_n_idx]
       visualize = res_config['visualize']
-      visualization_folder = res_config['visualization_folder'].replace('SEQ_NUM', str(seq_num))
+      visualization_folder = res_config['visualization_folder'].replace('SEQ_NUM', str(seq_num))+str(num_last_n)
       
       # specify the output folders
-      residual_image_folder = res_config['residual_image_folder'].replace('SEQ_NUM', str(seq_num))
+      residual_image_folder = res_config['residual_image_folder'].replace('SEQ_NUM', str(seq_num))+str(num_last_n)
       if not os.path.exists(residual_image_folder):
         os.makedirs(residual_image_folder)
         

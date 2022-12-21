@@ -6,10 +6,10 @@ residual_images:
   # plot images
   debug: False
   # normalize/scale the difference with corresponding range value
-  normalize: True
+  normalize: False
   # use the last n frame to calculate the difference image
   num_last_n: [1]
-  seqs: ["00","01","02","03","04","05","06","07","08","09","10", "11", "12", "13"]
+  seqs: ["08"]
 
   # Outputs
   # the suffix should be the same as num_last_n!
@@ -70,6 +70,7 @@ dataset:
   scan_folder: 'velodyne'
   pose_file: 'poses.txt'
   calib_file: 'calib.txt'
+  filter_points: False
   sensor:
     name: "HDL64"
     type: "spherical" # projective
