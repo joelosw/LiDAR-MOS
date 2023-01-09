@@ -8,14 +8,14 @@ residual_images:
   # normalize/scale the difference with corresponding range value
   normalize: False
   # use the last n frame to calculate the difference image
-  num_last_n: [1]
-  seqs: ["08"]
+  num_last_n: [1,2,3]
+  seqs: ["00"]
 
   # Outputs
   # the suffix should be the same as num_last_n!
-  residual_image_folder: '/home/joe46973/Masterarbeit/data/KITTI/dataset/sequences/SEQ_NUM/residual_images_1'
+  residual_image_folder: '/home/joe46973/Masterarbeit/data/KITTI/dataset/sequences/SEQ_NUM/residual_images_'
   visualize: True
-  visualization_folder: '/home/joe46973/Masterarbeit/data/KITTI/dataset/sequences/SEQ_NUM/visualization_1'
+  visualization_folder: '/home/joe46973/Masterarbeit/data/KITTI/dataset/sequences/SEQ_NUM/visualization_'
 
 
 ################################################################################
@@ -29,7 +29,7 @@ train:
   momentum: 0.9          # sgd momentum
   lr_decay: 0.99         # learning rate decay per epoch after initial cycle (from min lr)
   w_decay: 0.0001        # weight decay
-  batch_size: 8         # batch size
+  batch_size: 4          # batch size
   report_batch: 10       # every x batches, report loss
   report_epoch: 1        # every x epochs, report validation set
   epsilon_w: 0.001       # class weight w = 1 / (content + epsilon_w)
@@ -38,7 +38,7 @@ train:
     # sample images (one per batch of the last calculated batch)
   # in log folder
   show_scans: False      # show scans during training
-  workers: 4             # number of threads to get data
+  workers: 8             # number of threads to get data
 ################################################################################
 # infer parameters
 ################################################################################
@@ -74,7 +74,7 @@ dataset:
   sensor:
     name: "HDL64"
     type: "spherical" # projective
-    height: 64
+    height: 128
     width: 2048
     fov_up: 3.0
     fov_down: -25.0
@@ -92,7 +92,6 @@ dataset:
       - 6.91
       - 0.86
       - 0.16
-    n_input_scans: 1 # This needs to be the same as in the backbone params above!
     residual: True   # This needs to be the same as in the backbone params above!
     transform: False # tranform the last n_input_scans - 1 frames before concatenation
   labels: "kitti"

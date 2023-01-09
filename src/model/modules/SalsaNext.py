@@ -175,12 +175,8 @@ class SalsaNext(nn.Module):
         super(SalsaNext, self).__init__()
         self.nclasses = nclasses
 
-
-
-        self.input_size = 5 + num_last_n
+        self.input_size = 5 + num_last_n #r,x,y,z,e + residual_images
         
-
-
         print("Depth of backbone input = ", self.input_size)
         ###
         

@@ -37,18 +37,18 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
   new_poses = []
   for pose in poses:
     new_poses.append(T_velo_cam.dot(inv_frame0).dot(pose).dot(T_cam_velo))
-  poses = np.array(new_poses)
+  sensor_poses = np.array(new_poses)
   
   # load LiDAR scans
   
   scan_paths = load_files(scan_folder)
   
   # test for the first N scans
-  if num_frames >= len(poses) or num_frames <= 0:
-    #print('generate training data for all frames with number of: ', len(poses))
+  if num_frames >= len(sensor_poses) or num_frames <= 0:
+    #print('generate training data for all frames with number of: ', len(sensor_poses))
     pass
   else:
-    poses = poses[:num_frames]
+    sensor_poses = sensor_poses[:num_frames]
     scan_paths = scan_paths[:num_frames]
   
   height = range_image_params['height']
@@ -70,13 +70,12 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
     
     else:
       # load current scan and generate current range image
-      current_pose = poses[frame_idx]
+      current_pose = sensor_poses[frame_idx]
       current_scan = load_vertex(scan_paths[frame_idx])
       current_range = range_projection(current_scan.astype(np.float32),
                                        height, width, fov_up, fov_down, max_range, min_range)[:, :, 3].clip(0,max_range)
-      
       # load last scan, transform into the current coord and generate a transformed last range image
-      last_pose = poses[frame_idx - num_last_n]
+      last_pose = sensor_poses[frame_idx - num_last_n]
       last_scan = load_vertex(scan_paths[frame_idx - num_last_n])
       last_scan_transformed = np.linalg.inv(current_pose).dot(last_pose).dot(last_scan.T).T
       last_range_transformed = range_projection(last_scan_transformed.astype(np.float32), height, width, fov_up, fov_down, max_range, min_range)[:, :, 3].clip(0,max_range)

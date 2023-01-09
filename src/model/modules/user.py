@@ -44,7 +44,7 @@ class User():
                                       color_map=self.CONFIG['labels']["color_map"],
                                       learning_map=self.CONFIG['labels']["learning_map"],
                                       learning_map_inv=self.CONFIG['labels']["learning_map_inv"],
-                                      dataset_config=self.CONFIG["dataset"],
+                                      CFG=self.CONFIG,
                                       batch_size=1,
                                       workers=self.CONFIG["train"]["workers"],
                                       gt=self.CONFIG['infer']['ground_truth'] if 'infer' in self.CONFIG.keys() else True,

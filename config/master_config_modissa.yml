@@ -8,8 +8,8 @@ residual_images:
   # normalize/scale the difference with corresponding range value
   normalize: False
   # use the last n frame to calculate the difference image
-  num_last_n: [1,2,3,4,5]
-  seqs: ["Sequence_2"]
+  num_last_n: [1,2,3]
+  seqs: ["Sequence_1", Sequence_2"]
 
   # Outputs
   residual_image_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/SEQ_NUM/residual_images_'
@@ -283,6 +283,7 @@ split: # sequence numbers
     - 
   valid:
     - "Sequence_1"
+    - "Sequence_2"
   test:
     - 
 

@@ -74,8 +74,9 @@ class SemanticKitti(Dataset):
                learning_map,  # classes to learn (0 to N-1 for xentropy)
                learning_map_inv,    # inverse of previous (recover labels)
                dataset_config,       # sensor to parse scans from
+               CFG,
                gt=True,             # send ground truth?
-               transform=False):
+               augment=False):
     # save deats
     self.root = root
     self.sequences = sequences
@@ -95,7 +96,7 @@ class SemanticKitti(Dataset):
     self.sensor_fov_down = self.sensor["fov_down"]
     self.max_points = dataset_config['max_points']
     self.gt = gt
-    self.transform = transform
+    self.augment = augment
     
     """
     Added stuff for dynamic object segmentation
@@ -105,7 +106,7 @@ class SemanticKitti(Dataset):
     self.index_mapping = {}
     dataset_index = 0
     # added this for dynamic object removal
-    self.n_input_scans = self.sensor["n_input_scans"]  # This needs to be the same as in arch_cfg.yaml!
+    self.n_input_scans = len(CFG['residual_images']['num_last_n'])  # This needs to be the same as in arch_cfg.yaml!
     self.use_residual = self.sensor["residual"]
     self.transform_mod = self.sensor["transform"]
     """"""
@@ -165,7 +166,7 @@ class SemanticKitti(Dataset):
           else:
             folder_name = "residual_images_" + str(i+1)
           exec("residual_path_" + str(i+1) + " = os.path.join(self.root, seq, folder_name)")
-          print(f'residual_path_1 = {eval("residual_path_1")}')
+          print(f'residual_path_{str(i+1)} = {eval(f"residual_path_{str(i+1)}")}')
         
       # get files
       scan_files = [os.path.join(dp, f) for dp, dn, fn in os.walk(
@@ -212,8 +213,8 @@ class SemanticKitti(Dataset):
       # fill index mapper which is needed when loading several frames
       # n_used_files = max(0, len(scan_files) - self.n_input_scans + 1)  # this is used for multi-scan attach
       n_used_files = max(0, len(scan_files))  # this is used for multi residual images
-      for start_index in range(n_used_files):
-        self.index_mapping[dataset_index] = (seq, start_index)
+      for index_in_seq in range(n_used_files):
+        self.index_mapping[dataset_index] = (seq, index_in_seq)
         dataset_index += 1
       self.dataset_size += n_used_files
       """"""
@@ -236,14 +237,14 @@ class SemanticKitti(Dataset):
   def __getitem__(self, dataset_index):
     # Get sequence and start index
     #
-    seq, start_index = self.index_mapping[dataset_index]
-    # current_index = start_index + self.n_input_scans - 1  # this is used for multi-scan attach
-    current_index = start_index  # this is used for multi residual images
+    seq, index_in_seq = self.index_mapping[dataset_index]
+    # current_index = index_in_seq + self.n_input_scans - 1  # this is used for multi-scan attach
+    current_index = index_in_seq  # this is used for multi residual images
     current_pose = self.poses[seq][current_index]
     proj_full = torch.Tensor()
     # index is now looping from first scan in input sequence to current scan
-    # for index in range(start_index, start_index + self.n_input_scans):
-    for index in range(start_index, start_index + 1):
+    # for index in range(index_in_seq, index_in_seq + self.n_input_scans):
+    for index in range(index_in_seq, index_in_seq + 1):
       # get item in tensor shape
       scan_file = self.scan_files[seq][index]
       if self.gt:
@@ -251,8 +252,11 @@ class SemanticKitti(Dataset):
       
       if self.use_residual:
         for i in range(self.n_input_scans):
-          exec("residual_file_" + str(i+1) + " = " + "self.residual_files_" + str(i+1) + "[seq][index]")
-          
+          try:
+            exec("residual_file_" + str(i+1) + " = " + "self.residual_files_" + str(i+1) + "[seq][index]")
+          except IndexError:
+            print("Index Error when trying to assign: ")
+            print("residual_file_" + str(i+1) + " = " + "self.residual_files_" + str(i+1) + f"[{seq}][{index}]")
       index_pose = self.poses[seq][index]
   
       # open a semantic laserscan
@@ -260,7 +264,7 @@ class SemanticKitti(Dataset):
       flip_sign = False
       rot = False
       drop_points = False
-      if self.transform:
+      if self.augment:
           if random.random() > 0.5:
               if random.random() > 0.5:
                   DA = True
@@ -403,7 +407,7 @@ class Parser():
                color_map,         # color for each label
                learning_map,      # mapping for training labels
                learning_map_inv,  # recover labels from xentropy
-               dataset_config,            # sensor to use
+               CFG,               # master configuration file 
                batch_size,        # batch size for train and val
                workers,           # threads to load data
                gt=True,           # get gt?
@@ -420,8 +424,8 @@ class Parser():
     self.color_map = color_map
     self.learning_map = learning_map
     self.learning_map_inv = learning_map_inv
-    self.dataset_config = dataset_config
-    self.max_points = dataset_config['max_points']
+    self.dataset_config = CFG['dataset']
+    self.max_points = CFG['dataset']['max_points']
     self.batch_size = batch_size
     self.workers = workers
     self.gt = gt
@@ -439,7 +443,8 @@ class Parser():
                                          learning_map=self.learning_map,
                                          learning_map_inv=self.learning_map_inv,
                                          dataset_config=self.dataset_config,
-                                         transform=True, # set to True to augment the data
+                                         CFG=CFG,
+                                         augment=True, # set to True to augment the data
                                          gt=self.gt)
   
       self.trainloader = torch.utils.data.DataLoader(self.train_dataset,
@@ -458,6 +463,7 @@ class Parser():
                                          learning_map=self.learning_map,
                                          learning_map_inv=self.learning_map_inv,
                                          dataset_config=self.dataset_config,
+                                         CFG=CFG,
                                          gt=self.gt)
 
       self.validloader = torch.utils.data.DataLoader(self.valid_dataset,
@@ -476,6 +482,7 @@ class Parser():
                                          learning_map=self.learning_map,
                                          learning_map_inv=self.learning_map_inv,
                                          dataset_config=self.dataset_config,
+                                         CFG=CFG,
                                          gt=self.gt)
   
       self.validloader = torch.utils.data.DataLoader(self.valid_dataset,
@@ -495,6 +502,7 @@ class Parser():
                                           learning_map=self.learning_map,
                                           learning_map_inv=self.learning_map_inv,
                                           dataset_config=self.dataset_config,
+                                          CFG=CFG,
                                           gt=False)
   
         self.testloader = torch.utils.data.DataLoader(self.test_dataset,
