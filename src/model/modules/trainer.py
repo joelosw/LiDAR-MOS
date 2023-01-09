@@ -81,9 +81,11 @@ class Trainer():
                      "train_loss": 0,
                      "train_acc": 0,
                      "train_iou": 0,
+                     "train_iou_class_2": 0,
                      "valid_loss": 0,
                      "valid_acc": 0,
                      "valid_iou": 0,
+                     "valid_iou_class_2": 0,
                      "best_train_iou": 0,
                      "best_val_iou": 0}
 
@@ -101,7 +103,7 @@ class Trainer():
                                           color_map=self.CONFIG["labels"]["color_map"],
                                           learning_map=self.CONFIG["labels"]["learning_map"],
                                           learning_map_inv=self.CONFIG["labels"]["learning_map_inv"],
-                                          dataset_config=self.CONFIG["dataset"],
+                                          CFG=self.CONFIG,
                                           batch_size=self.CONFIG["train"]["batch_size"],
                                           workers=self.CONFIG["train"]["workers"],
                                           gt=True,
@@ -275,7 +277,7 @@ class Trainer():
         for epoch in range(self.epoch, self.CONFIG["train"]["max_epochs"]):
 
             # train for 1 epoch
-            acc, iou, loss, update_mean,hetero_l = self.train_epoch(train_loader=self.parser.get_train_set(),
+            acc, iou, loss, update_mean,hetero_l, iou_class_2 = self.train_epoch(train_loader=self.parser.get_train_set(),
                                                            model=self.model,
                                                            criterion=self.criterion,
                                                            optimizer=self.optimizer,
@@ -292,6 +294,7 @@ class Trainer():
             self.info["train_acc"] = acc
             self.info["train_iou"] = iou
             self.info["train_hetero"] = hetero_l
+            self.info["train_iou_class_2"] = iou_class_2
 
             # remember best iou and save checkpoint
             # state = {'epoch': epoch, 'state_dict': self.model.state_dict(),
@@ -321,7 +324,7 @@ class Trainer():
             if epoch % self.CONFIG["train"]["report_epoch"] == 0:
                 # evaluate on validation set
                 print("*" * 80)
-                acc, iou, loss, rand_img,hetero_l = self.validate(val_loader=self.parser.get_valid_set(),
+                acc, iou, loss, rand_img,hetero_l, class_jaccard = self.validate(val_loader=self.parser.get_valid_set(),
                                                          model=self.model,
                                                          criterion=self.criterion,
                                                          evaluator=self.evaluator,
@@ -334,6 +337,7 @@ class Trainer():
                 self.info["valid_acc"] = acc
                 self.info["valid_iou"] = iou
                 self.info['valid_heteros'] = hetero_l
+                self.info['valid_iou_class_2'] = class_jaccard[2]
 
             # remember best iou and save checkpoint
             if self.info['valid_iou'] > self.info['best_val_iou']:
@@ -370,6 +374,7 @@ class Trainer():
         losses = AverageMeter()
         acc = AverageMeter()
         iou = AverageMeter()
+        iou_class_2 = AverageMeter()
         hetero_l = AverageMeter()
         update_ratio_meter = AverageMeter()
 
@@ -423,7 +428,7 @@ class Trainer():
             losses.update(loss.item(), in_vol.size(0))
             acc.update(accuracy.item(), in_vol.size(0))
             iou.update(jaccard.item(), in_vol.size(0))
-
+            iou_class_2.update(class_jaccard[2], in_vol.size(0))
             # measure elapsed time
             self.batch_time_t.update(time.time() - end)
             end = time.time()
@@ -518,7 +523,7 @@ class Trainer():
             # step scheduler
             scheduler.step()
 
-        return acc.avg, iou.avg, losses.avg, update_ratio_meter.avg,hetero_l.avg
+        return acc.avg, iou.avg, losses.avg, update_ratio_meter.avg,hetero_l.avg, iou_class_2.avg
 
     def validate(self, val_loader, model, criterion, evaluator, class_func, color_fn, save_scans):
         losses = AverageMeter()
@@ -665,4 +670,4 @@ class Trainer():
                     self.info["valid_classes/" + class_func(i)] = jacc
 
 
-        return acc.avg, iou.avg, losses.avg, rand_imgs, hetero_l.avg
+        return acc.avg, iou.avg, losses.avg, rand_imgs, hetero_l.avg, class_jaccard
