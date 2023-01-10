@@ -7,9 +7,12 @@ import os
 import math
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-
+import subprocess
 np.random.seed(0)
 
+
+def get_git_hash() -> str:
+    return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
 
 def load_poses(pose_path):
   """ Load ground truth poses (T_w_cam0) from file.

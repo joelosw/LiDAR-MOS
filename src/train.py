@@ -10,7 +10,7 @@ import model.__init__ as booger
 import yaml
 from model.modules.trainer import *
 from pip._vendor.distlib.compat import raw_input
-
+from utils import get_git_hash
 from model.modules.SalsaNextAdf import *
 from model.modules.SalsaNext import *
 #from src.model.modules.save_dataset_projected import *
@@ -80,7 +80,9 @@ if __name__ == '__main__':
     )
 
     FLAGS, unparsed = parser.parse_known_args()
-    FLAGS.log = FLAGS.log + '/logs/' + datetime.datetime.now().strftime("%Y-%-m-%d-%H:%M") + FLAGS.name
+    if not FLAGS.name:
+        FLAGS.name = '_' + get_git_hash()
+    FLAGS.log = FLAGS.log + '/training/' + datetime.datetime.now().strftime("%Y-%-m-%d-%H:%M") + FLAGS.name
     
     # open config file
     try:

@@ -108,10 +108,11 @@ if __name__ == '__main__':
   scan_names.sort()
 
   # does sequence folder exist?
+  sensor_name = CFG['dataset']['sensor']['name']
   if not FLAGS.ignore_semantics:
     if FLAGS.predictions is not None:
       label_paths = os.path.join(FLAGS.predictions, "sequences",
-                                 FLAGS.sequence, "predictions")
+                                 FLAGS.sequence,sensor_name, "predictions")
     else:
       label_paths = os.path.join(CFG['dataset']['root_folder'],
                                  FLAGS.sequence, "labels")

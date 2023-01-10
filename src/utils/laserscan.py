@@ -201,7 +201,7 @@ class LaserScan:
         # copy of depth in original order
         self.unproj_range = np.copy(depth)
 
-        # order in decreasing depth
+        # order in decreasing depth, so that closer points get filled last.
         indices = np.arange(depth.shape[0])
         order = np.argsort(depth)[::-1]
         depth = depth[order]

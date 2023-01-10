@@ -59,7 +59,7 @@ def generate_res_images(pose_file, calib_file, scan_folder, residual_image_folde
   min_range =  range_image_params['min_range']
   
   # generate residual images for the whole sequence
-  for frame_idx in trange(len(scan_paths), desc="Frames in sequence"):
+  for frame_idx in trange(len(scan_paths), desc="Frames in sequence", leave=False):
     file_name = os.path.join(residual_image_folder, str(frame_idx).zfill(6))
     diff_image = np.full((range_image_params['height'], range_image_params['width']), 0,
                              dtype=np.float32)  # [H,W] range (0 is no data)
@@ -158,10 +158,11 @@ if __name__ == '__main__':
     config_filename = sys.argv[1]
   
   master_config = yaml.load(open(config_filename), Loader=yaml.FullLoader)
+  sensor_name = master_config['dataset']['sensor']['name']
 
   res_config = master_config['residual_images']
   for num_last_n_idx in trange(len(res_config['num_last_n']), desc="num_last_n"):
-    for seq_idx in trange(len(res_config['seqs']), desc="Sequence in Num_last_n"):
+    for seq_idx in trange(len(res_config['seqs']), desc="Sequence in Num_last_n", leave=False):
       # specify parameters
       seq_num = res_config['seqs'][seq_idx]
       num_frames = res_config['num_frames']
@@ -169,10 +170,10 @@ if __name__ == '__main__':
       normalize = res_config['normalize']
       num_last_n = res_config['num_last_n'][num_last_n_idx]
       visualize = res_config['visualize']
-      visualization_folder = res_config['visualization_folder'].replace('SEQ_NUM', str(seq_num))+str(num_last_n)
+      visualization_folder = res_config['visualization_folder'].replace('SEQ_NUM', str(seq_num)).replace('SENSOR', sensor_name)+str(num_last_n)
       
       # specify the output folders
-      residual_image_folder = res_config['residual_image_folder'].replace('SEQ_NUM', str(seq_num))+str(num_last_n)
+      residual_image_folder = res_config['residual_image_folder'].replace('SEQ_NUM', str(seq_num)).replace('SENSOR', sensor_name)+str(num_last_n)
       if not os.path.exists(residual_image_folder):
         os.makedirs(residual_image_folder)
         
@@ -182,8 +183,8 @@ if __name__ == '__main__':
       
       # load poses
       root_path = master_config['dataset']['root_folder']
-      pose_file = os.path.join(root_path,seq_num,master_config['dataset']['pose_file'])
+      pose_file = os.path.join(root_path,seq_num,sensor_name, master_config['dataset']['pose_file'])
       calib_file = os.path.join(root_path,seq_num,master_config['dataset']['calib_file'])
-      scan_folder = os.path.join(root_path,seq_num,master_config['dataset']['scan_folder'])
+      scan_folder = os.path.join(root_path,seq_num,sensor_name, master_config['dataset']['scan_folder'])
       range_image_params = master_config['dataset']['sensor']
       generate_res_images(pose_file, calib_file, scan_folder, residual_image_folder, visualization_folder, range_image_params, num_last_n)

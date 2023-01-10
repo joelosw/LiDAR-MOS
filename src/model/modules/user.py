@@ -130,13 +130,14 @@ class User():
     with torch.no_grad():
       end = time.time()
 
-      for i, (proj_in, proj_mask, _, _, path_seq, path_name, p_x, p_y, proj_range, unproj_range, _, _, _, _, npoints) in enumerate(loader):
+      for i, (proj_in, proj_mask, _, _, path_seq, path_sensor, path_name, p_x, p_y, proj_range, unproj_range, _, _, _, _, npoints) in enumerate(loader):
         # first cut to real size (batch size one allows it)
         p_x = p_x[0, :npoints]
         p_y = p_y[0, :npoints]
         proj_range = proj_range[0, :npoints]
         unproj_range = unproj_range[0, :npoints]
         path_seq = path_seq[0]
+        path_sensor = self.CONFIG['dataset']['sensor']['name']
         path_name = path_name[0]
 
         if self.gpu:
@@ -228,7 +229,7 @@ class User():
             if torch.cuda.is_available():
                 torch.cuda.synchronize()
             res = time.time() - end
-            print("Network seq", path_seq, "scan", path_name,
+            print("Network seq", path_seq, "sensor", path_sensor, "scan", path_name,
                   "in", res, "sec")
             end = time.time()
             cnn.append(res)
@@ -236,7 +237,7 @@ class User():
             if torch.cuda.is_available():
                 torch.cuda.synchronize()
             res = time.time() - end
-            print("Network seq", path_seq, "scan", path_name,
+            print("Network seq", path_seq, "sensor", path_sensor, "scan", path_name,
                   "in", res, "sec")
             end = time.time()
             cnn.append(res)
@@ -256,7 +257,7 @@ class User():
             if torch.cuda.is_available():
                 torch.cuda.synchronize()
             res = time.time() - end
-            print("KNN Infered seq", path_seq, "scan", path_name,
+            print("KNN Infered seq", path_seq, "sensor", path_sensor, "scan", path_name,
                   "in", res, "sec")
             knn.append(res)
             end = time.time()
@@ -271,5 +272,5 @@ class User():
 
             # save scan
             path = os.path.join(self.logdir, "sequences",
-                                path_seq, "predictions", path_name)
+                                path_seq, path_sensor, "predictions", path_name)
             pred_np.tofile(path)

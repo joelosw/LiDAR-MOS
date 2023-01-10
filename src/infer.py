@@ -95,7 +95,7 @@ if __name__ == '__main__':
         print(e)
         print("Error opening config yaml file.")
         quit()
-
+    sensor_name = CONFIG["dataset"]["sensor"]["name"]
     # create log folder
     try:
         if os.path.isdir(FLAGS.log):
@@ -108,21 +108,21 @@ if __name__ == '__main__':
                 seq = '{0:02d}'.format(int(seq))
             print("train", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
-            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, "predictions"))
+            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, sensor_name, "predictions"))
         for seq in CONFIG["split"]["valid"]:
             if seq is None: continue
             if not isinstance(seq, str):
                 seq = '{0:02d}'.format(int(seq))
             print("valid", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
-            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, "predictions"))
+            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, sensor_name, "predictions"))
         for seq in CONFIG["split"]["test"]:
             if seq is None: continue
             if not isinstance(seq, str):
                 seq = '{0:02d}'.format(int(seq))
             print("test", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
-            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, "predictions"))
+            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, sensor_name, "predictions"))
     except Exception as e:
         print(e)
         print("Error creating log directory. Check permissions!")
