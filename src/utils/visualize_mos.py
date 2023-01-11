@@ -95,7 +95,7 @@ if __name__ == '__main__':
   # does sequence folder exist?
 
   scan_paths = os.path.join(CFG['dataset']['root_folder'],
-                            FLAGS.sequence, CFG['dataset']['scan_folder'])
+                            FLAGS.sequence,CFG['dataset']['sensor']['name'] ,CFG['dataset']['scan_folder'])
   if os.path.isdir(scan_paths):
     print("Sequence folder exists! Using sequence from %s" % scan_paths)
   else:

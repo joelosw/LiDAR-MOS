@@ -359,8 +359,8 @@ class SemanticModissa(Dataset):
     # get name and sequence
     path_norm = os.path.normpath(scan_file)
     path_split = path_norm.split(os.sep)
-    path_seq = path_split[-3]
-    path_sensor= path_split[-2]
+    path_seq = path_split[-4]
+    path_sensor= path_split[-3]
     path_name = path_split[-1].replace(".bin", ".label")
 
     # return
