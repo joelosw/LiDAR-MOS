@@ -21,7 +21,7 @@ if __name__ == '__main__':
         '--config', '-c',
         type=str,
         required=False,
-        default="config/labels/semantic-kitti.yaml",
+        default="config/master_config.yaml",
         help='Dataset config file. Defaults to %(default)s',
     )
     parser.add_argument(

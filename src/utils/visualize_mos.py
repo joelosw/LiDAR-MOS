@@ -115,7 +115,7 @@ if __name__ == '__main__':
                                  FLAGS.sequence,sensor_name, "predictions")
     else:
       label_paths = os.path.join(CFG['dataset']['root_folder'],
-                                 FLAGS.sequence, "labels")
+                                 FLAGS.sequence, sensor_name, "labels")
     if os.path.isdir(label_paths):
       print("Labels folder exists! Using labels from %s" % label_paths)
     else:
@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
   # create a scan
   if FLAGS.ignore_semantics:
-    scan = LaserScan(project=True)  # project all opened scans to spheric proj
+    scan = LaserScan(project=True, H=CFG['dataset']['sensor']['height'],W=CFG['dataset']['sensor']['width'], fov_up=CFG['dataset']['sensor']['fov_up'], fov_down=CFG['dataset']['sensor']['fov_down'], filter=CFG['dataset']['filter_points'])  # project all opened scans to spheric proj
   else:
     color_dict = CFG['labels']["color_map"]
     print(f'Color Dict: {color_dict}')
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     color_dict[0] = [128,128,128]
     color_dict[9] = [255,255,255]
     color_dict[251] = [0,0,255]
-    scan = SemLaserScan(sem_color_dict=color_dict, project=True, H=CFG['dataset']['sensor']['height'],W=CFG['dataset']['sensor']['width'], fov_up=11.25, fov_down=11.25,filter=CFG['dataset']['filter_points'])
+    scan = SemLaserScan(sem_color_dict=color_dict, project=True, H=CFG['dataset']['sensor']['height'],W=CFG['dataset']['sensor']['width'], fov_up=CFG['dataset']['sensor']['fov_up'], fov_down=CFG['dataset']['sensor']['fov_down'],filter=CFG['dataset']['filter_points'])
 
   # create a visualizer
   semantics = not FLAGS.ignore_semantics

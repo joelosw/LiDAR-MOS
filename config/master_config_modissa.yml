@@ -9,7 +9,7 @@ residual_images:
   normalize: False
   # use the last n frame to calculate the difference image
   num_last_n: [1,2,3]
-  seqs: ["Sequence_2"]
+  seqs: ["Sequence_12"]
 
   # Outputs
   residual_image_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/SEQ_NUM/SENSOR/residual_images_'
@@ -66,12 +66,12 @@ post:
 # dataset (to find parser)
 dataset:
   root_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/' # where sequences are stored
-  scan_folder: 'o1_not_interpolated_kitti_bins'
+  scan_folder: 'KITTI_BIN'
   pose_file: 'poses.txt'
   calib_file: 'calib.txt'
   filter_points: True
   sensor:
-    name: "o1"
+    name: "o2"
     type: "spherical" # projective
     height: 128
     width: 2048
@@ -279,10 +279,11 @@ labels:
 
 split: # sequence numbers
   train:
-    - 
+    - Sequence_0
+    - Sequence_1
+    - Sequence_2
   valid:
-#    - "Sequence_1"
-    - "Sequence_2"
+    - Sequence_12
   test:
     - 
 

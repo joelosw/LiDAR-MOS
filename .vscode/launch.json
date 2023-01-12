@@ -56,11 +56,12 @@
             "type": "python",
             "args": [
                 "-c",
-                "/home/joe46973/Masterarbeit/LiDAR-MOS/config/master_config.yml",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/config/master_config_modissa.yml",
                 "-p",
                 "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/infer_log",
                 "-s",
-                "08"
+                "Sequence_0",
+                "-i"
 
             ],
             "request": "launch",

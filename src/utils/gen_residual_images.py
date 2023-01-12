@@ -184,7 +184,7 @@ if __name__ == '__main__':
       # load poses
       root_path = master_config['dataset']['root_folder']
       pose_file = os.path.join(root_path,seq_num,sensor_name, master_config['dataset']['pose_file'])
-      calib_file = os.path.join(root_path,seq_num,master_config['dataset']['calib_file'])
+      calib_file = os.path.join(root_path,seq_num,sensor_name, master_config['dataset']['calib_file'])
       scan_folder = os.path.join(root_path,seq_num,sensor_name, master_config['dataset']['scan_folder'])
       range_image_params = master_config['dataset']['sensor']
       generate_res_images(pose_file, calib_file, scan_folder, residual_image_folder, visualization_folder, range_image_params, num_last_n)
