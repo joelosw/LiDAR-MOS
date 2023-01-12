@@ -10,7 +10,7 @@ import model.__init__ as booger
 import yaml
 from model.modules.trainer import *
 from pip._vendor.distlib.compat import raw_input
-from utils import get_git_hash
+from utils.utils import get_git_hash
 from model.modules.SalsaNextAdf import *
 from model.modules.SalsaNext import *
 #from src.model.modules.save_dataset_projected import *

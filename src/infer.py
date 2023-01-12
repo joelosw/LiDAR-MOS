@@ -34,9 +34,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '--log', '-l',
         type=str,
-        default=os.path.expanduser("~") + '/logs/' +
-                datetime.datetime.now().strftime("%Y-%-m-%d-%H:%M") + '/',
-        help='Directory to put the predictions. Default: ~/logs/date+time'
+        default=None,
+        help='Directory to put the predictions. Defaults to model-dir'
     )
     parser.add_argument(
         '--model', '-m',
@@ -97,32 +96,32 @@ if __name__ == '__main__':
         quit()
     sensor_name = CONFIG["dataset"]["sensor"]["name"]
     # create log folder
+    if not FLAGS.log:
+        FLAGS.log = FLAGS.model
     try:
-        if os.path.isdir(FLAGS.log):
-            shutil.rmtree(FLAGS.log)
-        os.makedirs(FLAGS.log)
-        os.makedirs(os.path.join(FLAGS.log, "sequences"))
+        os.makedirs(FLAGS.log, exist_ok=True)
+        os.makedirs(os.path.join(FLAGS.log, "sequences"), exist_ok=True)
         for seq in CONFIG["split"]["train"]:
             if seq is None: continue
             if not isinstance(seq, str):
                 seq = '{0:02d}'.format(int(seq))
             print("train", seq)
-            os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
-            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, sensor_name, "predictions"))
+            os.makedirs(os.path.join(FLAGS.log, "sequences", seq), exist_ok=True)
+            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, sensor_name, "predictions"), exist_ok=True)
         for seq in CONFIG["split"]["valid"]:
             if seq is None: continue
             if not isinstance(seq, str):
                 seq = '{0:02d}'.format(int(seq))
             print("valid", seq)
-            os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
-            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, sensor_name, "predictions"))
+            os.makedirs(os.path.join(FLAGS.log, "sequences", seq), exist_ok=True)
+            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, sensor_name, "predictions"), exist_ok=True)
         for seq in CONFIG["split"]["test"]:
             if seq is None: continue
             if not isinstance(seq, str):
                 seq = '{0:02d}'.format(int(seq))
             print("test", seq)
-            os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
-            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, sensor_name, "predictions"))
+            os.makedirs(os.path.join(FLAGS.log, "sequences", seq), exist_ok=True)
+            os.makedirs(os.path.join(FLAGS.log, "sequences", seq, sensor_name, "predictions"), exist_ok=True)
     except Exception as e:
         print(e)
         print("Error creating log directory. Check permissions!")

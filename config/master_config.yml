@@ -260,8 +260,7 @@ labels:
     0: True      # "unlabeled", and others ignored
     1: False     # "car"
     2: False     # "bicycle"
-    3: False     # "motorcycle"
-    4: False     # "truck"
+    3: False     # "motorcycle"filter_points: True
     5: False     # "other-vehicle"
     6: False     # "person"
     7: False     # "bicyclist"

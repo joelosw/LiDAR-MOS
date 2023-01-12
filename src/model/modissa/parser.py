@@ -158,7 +158,7 @@ class SemanticModissa(Dataset):
         scan_path = os.path.join(self.root, seq, sensor_name, self.dataset_config['scan_folder'])
       else:
         scan_path = os.path.join(self.root, seq, "velodyne")
-      label_path = os.path.join(self.root, seq, "labels")
+      label_path = os.path.join(self.root, seq, sensor_name,"labels")
       
       if self.use_residual:
         for i in range(self.n_input_scans):

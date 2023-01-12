@@ -34,11 +34,11 @@
             "justMyCode": false
         },
         {
-            "name": "Python: training with args - master_config",
+            "name": "Python: training with args - modissa",
             "type": "python",
             "args": [
                 "-c",
-                "/home/joe46973/Masterarbeit/LiDAR-MOS/config/master_config.yml",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/config/master_config_modissa.yml",
                 "-l",
                 "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/second_training_log",
                 "-u",
@@ -58,10 +58,9 @@
                 "-c",
                 "/home/joe46973/Masterarbeit/LiDAR-MOS/config/master_config_modissa.yml",
                 "-p",
-                "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/infer_log",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/modified_model_modissa_e6724d0",
                 "-s",
-                "Sequence_0",
-                "-i"
+                "Sequence_12",
 
             ],
             "request": "launch",

@@ -126,7 +126,7 @@ class LaserScan:
 
         #valid_idx = range(len(points))
         if not np.all(self.valid_idx) and self.filter:
-            print(f'Filtering Out {np.sum(~self.valid_idx)} points from laserscan')
+            #print(f'Filtering Out {np.sum(~self.valid_idx)} points from laserscan')
             self.points = points[self.valid_idx]
         else:
             self.points = points
@@ -141,7 +141,7 @@ class LaserScan:
             self.points[:, 1] += jitter_y
             self.points[:, 2] += jitter_z
         if self.rot:
-            self.points = self.points @ R.random(random_state=1234).as_dcm().T
+            self.points = self.points @ R.random(random_state=1234).as_matrix().T
         if remissions is not None:
             if not np.all(self.valid_idx) and self.filter:
                 self.remissions = remissions[self.valid_idx]  # get remission
@@ -306,7 +306,7 @@ class SemLaserScan(LaserScan):
         if not isinstance(label, np.ndarray):
             raise TypeError("Label should be numpy array")
 
-        if not np.all(self.valid_idx)and self.filter and np.sum(self.valid_idx) < label.shape[0]:
+        if not np.all(self.valid_idx) and self.filter and np.sum(self.valid_idx) < label.shape[0]:
             label = label[self.valid_idx]
         # only fill in attribute if the right size
         if label.shape[0] == self.points.shape[0]:

@@ -2,7 +2,7 @@ pyyaml>5.1
 tqdm
 matplotlib
 numpy
-scipy
+scipy>1.4.0 #as_dcm -> as_matrix
 opencv-python
 open3d
 tqdm

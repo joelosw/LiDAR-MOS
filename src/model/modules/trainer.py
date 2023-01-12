@@ -337,7 +337,7 @@ class Trainer():
                 self.info["valid_acc"] = acc
                 self.info["valid_iou"] = iou
                 self.info['valid_heteros'] = hetero_l
-                self.info['valid_iou_class_2'] = class_jaccard[2]
+                self.info['valid_iou_class_2'] = class_jaccard[2].cpu()
 
             # remember best iou and save checkpoint
             if self.info['valid_iou'] > self.info['best_val_iou']:
@@ -386,7 +386,7 @@ class Trainer():
         model.train()
 
         end = time.time()
-        for i, (in_vol, proj_mask, proj_labels, _, path_seq, path_name, _, _, _, _, _, _, _, _, _) in enumerate(train_loader):
+        for i, (in_vol, proj_mask, proj_labels, _, path_seq, path_sensor, path_name, _, _, _, _, _, _, _, _, _) in enumerate(train_loader):
             # measure data loading time
             self.data_time_t.update(time.time() - end)
             if not self.multi_gpu and self.gpu:
@@ -413,7 +413,13 @@ class Trainer():
                 idx = torch.ones(self.n_gpus).cuda()
                 loss_m.backward(idx)
             else:
-                loss_m.backward()
+                try:
+                    loss_m.backward()
+                except RuntimeError as e:
+                    print(f'Happend with loss of type {type(loss_m)}, loss: \n {loss_m}')
+                    print(e)
+                    raise e
+
             optimizer.step()
 
             # measure accuracy and record loss
@@ -428,7 +434,7 @@ class Trainer():
             losses.update(loss.item(), in_vol.size(0))
             acc.update(accuracy.item(), in_vol.size(0))
             iou.update(jaccard.item(), in_vol.size(0))
-            iou_class_2.update(class_jaccard[2], in_vol.size(0))
+            iou_class_2.update(class_jaccard[2].item(), in_vol.size(0))
             # measure elapsed time
             self.batch_time_t.update(time.time() - end)
             end = time.time()
@@ -477,10 +483,10 @@ class Trainer():
                           'Loss {loss.val:.4f} ({loss.avg:.4f}) | '
                           'Hetero {hetero_l.val:.4f} ({hetero_l.avg:.4f}) | '
                           'acc {acc.val:.3f} ({acc.avg:.3f}) | '
-                          'IoU {iou.val:.3f} ({iou.avg:.3f}) | [{estim}]'.format(
+                          'IoU {iou.val:.3f} ({iou.avg:.3f}) / class2: {iou_2.val:.4f} | [{estim}]'.format(
                         epoch, i, len(train_loader), batch_time=self.batch_time_t,
                         data_time=self.data_time_t, loss=losses, hetero_l=hetero_l,acc=acc, iou=iou, lr=lr,
-                        umean=update_mean, ustd=update_std, estim=self.calculate_estimate(epoch, i)))
+                        umean=update_mean, ustd=update_std, iou_2 = iou_class_2, estim=self.calculate_estimate(epoch, i)))
 
                     save_to_log(self.log, 'log.txt', 'Lr: {lr:.3e} | '
                           'Update: {umean:.3e} mean,{ustd:.3e} std | '
@@ -503,10 +509,10 @@ class Trainer():
                           'Data {data_time.val:.3f} ({data_time.avg:.3f}) | '
                           'Loss {loss.val:.4f} ({loss.avg:.4f}) | '
                           'acc {acc.val:.3f} ({acc.avg:.3f}) | '
-                          'IoU {iou.val:.3f} ({iou.avg:.3f}) | [{estim}]'.format(
+                          'IoU {iou.val:.3f} ({iou.avg:.3f})/ class2: {iou_2.val:.4f} | [{estim}]'.format(
                         epoch, i, len(train_loader), batch_time=self.batch_time_t,
                         data_time=self.data_time_t, loss=losses, acc=acc, iou=iou, lr=lr,
-                        umean=update_mean, ustd=update_std, estim=self.calculate_estimate(epoch, i)))
+                        umean=update_mean, ustd=update_std,iou_2 = iou_class_2, estim=self.calculate_estimate(epoch, i)))
 
                     save_to_log(self.log, 'log.txt', 'Lr: {lr:.3e} | '
                                                      'Update: {umean:.3e} mean,{ustd:.3e} std | '
@@ -515,10 +521,10 @@ class Trainer():
                                                      'Data {data_time.val:.3f} ({data_time.avg:.3f}) | '
                                                      'Loss {loss.val:.4f} ({loss.avg:.4f}) | '
                                                      'acc {acc.val:.3f} ({acc.avg:.3f}) | '
-                                                     'IoU {iou.val:.3f} ({iou.avg:.3f}) | [{estim}]'.format(
+                                                     'IoU {iou.val:.3f} ({iou.avg:.3f}) / class2: {iou_2.val:.4f} | [{estim}]'.format(
                         epoch, i, len(train_loader), batch_time=self.batch_time_t,
                         data_time=self.data_time_t, loss=losses, acc=acc, iou=iou, lr=lr,
-                        umean=update_mean, ustd=update_std, estim=self.calculate_estimate(epoch, i)))
+                        umean=update_mean, ustd=update_std, iou_2 = iou_class_2, estim=self.calculate_estimate(epoch, i)))
 
             # step scheduler
             scheduler.step()
@@ -544,7 +550,7 @@ class Trainer():
 
         with torch.no_grad():
             end = time.time()
-            for i, (in_vol, proj_mask, proj_labels, _, path_seq, path_name, _, _, _, _, _, _, _, _, _) in enumerate(val_loader):
+            for i, (in_vol, proj_mask, proj_labels, _, path_seq, path_sensor, path_name, _, _, _, _, _, _, _, _, _) in enumerate(val_loader):
                 if not self.multi_gpu and self.gpu:
                     in_vol = in_vol.cuda()
                     proj_mask = proj_mask.cuda()

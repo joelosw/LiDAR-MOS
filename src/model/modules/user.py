@@ -110,8 +110,8 @@ class User():
     else:
         self.infer_subset(loader=self.parser.get_test_set(),
                         to_orig_fn=self.parser.to_original, cnn=cnn, knn=knn)
-    print("Mean CNN inference time:{}\t std:{}".format(np.mean(cnn), np.std(cnn)))
-    print("Mean KNN inference time:{}\t std:{}".format(np.mean(knn), np.std(knn)))
+    print("Mean CNN inference time:{:.4f} ms\t std:{}".format(np.mean(cnn)*1000, np.std(cnn)))
+    print("Mean KNN inference time:{:.4f} ms\t std:{}".format(np.mean(knn)*1000, np.std(knn)))
     print("Total Frames:{}".format(len(cnn)))
     print("Finished Infering")
 
@@ -230,15 +230,7 @@ class User():
                 torch.cuda.synchronize()
             res = time.time() - end
             print("Network seq", path_seq, "sensor", path_sensor, "scan", path_name,
-                  "in", res, "sec")
-            end = time.time()
-            cnn.append(res)
-
-            if torch.cuda.is_available():
-                torch.cuda.synchronize()
-            res = time.time() - end
-            print("Network seq", path_seq, "sensor", path_sensor, "scan", path_name,
-                  "in", res, "sec")
+                  f"in {res*1000:.4f} ms")
             end = time.time()
             cnn.append(res)
 
@@ -258,7 +250,7 @@ class User():
                 torch.cuda.synchronize()
             res = time.time() - end
             print("KNN Infered seq", path_seq, "sensor", path_sensor, "scan", path_name,
-                  "in", res, "sec")
+                  f"in {res*1000:.4f} ms")
             knn.append(res)
             end = time.time()
 
