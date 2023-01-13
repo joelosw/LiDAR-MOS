@@ -6,6 +6,7 @@ from vispy.scene import visuals, SceneCanvas
 import numpy as np
 from matplotlib import pyplot as plt
 import cv2
+import os
 
 
 class LaserScanVis:
@@ -134,7 +135,7 @@ class LaserScanVis:
       self.scan.colorize()
 
     # then change names
-    title = "scan " + str(self.offset) + " of " + str(len(self.scan_names)-1)
+    title = "scan " + self.scan_names[self.offset].split(os.sep)[-1] + f" in [{self.scan_names[0].split(os.sep)[-1][:-4]} - {self.scan_names[-1].split(os.sep)[-1][:-4]}]"
     self.canvas.title = "3D: " + title
     self.img_canvas.title = "Range: " + title
 
