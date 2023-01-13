@@ -279,19 +279,19 @@ labels:
 
 split: # sequence numbers
   train:
-    # - Sequence_0
-    # - Sequence_1
-    # - Sequence_2
-    # - Sequence_4
+    - Sequence_0
+    - Sequence_1
+    - Sequence_2
+    - Sequence_4
     - Sequence_5
+    - Sequence_6
+    - Sequence_7
+    - Sequence_9
   valid:
     - Sequence_3
     - Sequence_12
-  test:
-    - Sequence_6
-    - Sequence_7
+  test:   
     - Sequence_8
-    - Sequence_9
     - Sequence_10
     - Sequence_11
     - Sequence_13
