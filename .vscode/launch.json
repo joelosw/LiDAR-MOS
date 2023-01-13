@@ -17,14 +17,16 @@
             "name": "Python: infer with args",
             "type": "python",
             "args": [
-                "-d",
-                "/home/joe46973/Masterarbeit/data/KITTI/dataset/",
-                "-l",
-                "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/infer_log",
+                "-cfg",
+                "config/master_config_modissa.yml",
                 "-m",
-                "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/second_training_log/logs/2022-12-08-11:11",
-               "-s",
-               "valid"
+                "logs/modified_training/logs/2022-12-21-14:46_e6724d0",
+                "-l",
+                "logs/modified_model_modissa/",
+                "-c",
+                "0",
+                "-s",
+                "train"
             ],
             "request": "launch",
             "env": {"CUDA_VISIBLE_DEVICES": ""},
@@ -52,15 +54,15 @@
             "justMyCode": false
         },
         {
-            "name": "Python: visualize with args - master_config",
+            "name": "Python: visualize with args - master_config_modissa",
             "type": "python",
             "args": [
                 "-c",
                 "/home/joe46973/Masterarbeit/LiDAR-MOS/config/master_config_modissa.yml",
                 "-p",
-                "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/modified_model_modissa_e6724d0",
+                "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/modified_training/logs/2022-12-21-14:46_e6724d0_finetuned_30e5ad4",
                 "-s",
-                "Sequence_12",
+                "Sequence_5",
 
             ],
             "request": "launch",

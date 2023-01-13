@@ -98,7 +98,7 @@ class LaserScan:
         """"""
         points = points_transformed[:, :3]
         remissions = scan[:, 3]  # get remission
-        if self.drop_points is not False:
+        if self.drop_points:
             self.points_to_drop = np.random.randint(0, len(points)-1,int(len(points)*self.drop_points))
             points = np.delete(points,self.points_to_drop,axis=0)
             remissions = np.delete(remissions,self.points_to_drop)

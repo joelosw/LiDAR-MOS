@@ -48,7 +48,8 @@ class User():
                                       batch_size=1,
                                       workers=self.CONFIG["train"]["workers"],
                                       gt=self.CONFIG['infer']['ground_truth'] if 'infer' in self.CONFIG.keys() else True,
-                                      shuffle_train=False)
+                                      shuffle_train=False,
+                                      augment_train=False) # Don't augment when infering, because label shape will not match later loaded point clouds
 
     # concatenate the encoder and the head
     with torch.no_grad():

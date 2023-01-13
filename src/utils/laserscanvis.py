@@ -7,6 +7,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import cv2
 import os
+import time
 
 
 class LaserScanVis:
@@ -172,13 +173,13 @@ class LaserScanVis:
                              edge_color=self.scan.inst_label_color[..., ::-1],
                              size=1)
 
-    self.resize_images(None)
 
     if self.instances:
       self.inst_img_vis.set_data(self.scan.proj_inst_color[..., ::-1])
       self.inst_img_vis.update()
 
   def resize_images(self, event):
+    #print("recieved resizing event: %s" % event)
     size = self.img_view.size
     data = np.copy(self.scan.proj_range)
     # print(data[data > 0].max(), data[data > 0].min())

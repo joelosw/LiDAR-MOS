@@ -9,7 +9,7 @@ residual_images:
   normalize: False
   # use the last n frame to calculate the difference image
   num_last_n: [1,2,3]
-  seqs: ["Sequence_3","Sequence_4","Sequence_5","Sequence_6"]
+  seqs: ["Sequence_7","Sequence_8","Sequence_9"]
 
   # Outputs
   residual_image_folder: '/home/joe46973/Masterarbeit/data/MODISSA/sequences/SEQ_NUM/SENSOR/residual_images_'
@@ -279,14 +279,20 @@ labels:
 
 split: # sequence numbers
   train:
-    - Sequence_0
-    - Sequence_1
-    - Sequence_2
-    - Sequence_4
+    # - Sequence_0
+    # - Sequence_1
+    # - Sequence_2
+    # - Sequence_4
     - Sequence_5
   valid:
     - Sequence_3
     - Sequence_12
   test:
-    - 
+    - Sequence_6
+    - Sequence_7
+    - Sequence_8
+    - Sequence_9
+    - Sequence_10
+    - Sequence_11
+    - Sequence_13
 
