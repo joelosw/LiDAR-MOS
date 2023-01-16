@@ -161,7 +161,7 @@ if __name__ == '__main__':
   sensor_name = master_config['dataset']['sensor']['name']
 
   res_config = master_config['residual_images']
-  for num_last_n_idx in trange(len(res_config['num_last_n']), desc="num_last_n"):
+  for num_last_n_idx in tqdm(res_config['num_last_n'], total=len(res_config['num_last_n']), desc="num_last_n"):
     for seq_idx in trange(len(res_config['seqs']), desc="Sequence in Num_last_n", leave=False):
       # specify parameters
       seq_num = res_config['seqs'][seq_idx]

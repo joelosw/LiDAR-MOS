@@ -345,6 +345,7 @@ class SemanticModissa(Dataset):
           [proj_range.unsqueeze(0).clone(),
            proj_xyz.clone().permute(2, 0, 1),
            proj_remission.unsqueeze(0).clone()])
+      #Normalize Images
       proj = (proj - self.sensor_img_means[:, None, None]) / self.sensor_img_stds[:, None, None]
 
       proj_full = torch.cat([proj_full, proj])

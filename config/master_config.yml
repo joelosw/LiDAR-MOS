@@ -72,7 +72,7 @@ dataset:
   calib_file: 'calib.txt'
   filter_points: False
   sensor:
-    name: "HDL64"
+    name: "." #"HDL64"
     type: "spherical" # projective
     height: 128
     width: 2048

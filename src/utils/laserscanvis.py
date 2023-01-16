@@ -63,7 +63,7 @@ class LaserScanVis:
       print("Using gt_names in visualizer")
       self.gt_view = vispy.scene.widgets.ViewBox(
           border_color='white', parent=self.canvas.scene)
-      self.grid.add_widget(self.gt_view, 0, 2)
+      self.grid.add_widget(self.gt_view, 0, 1 + int(self.semantics))
       self.gt_vis = visuals.Markers()
       self.gt_view.camera = 'turntable'
       self.gt_view.add(self.gt_vis)
@@ -109,7 +109,7 @@ class LaserScanVis:
     if self.gt_names:
       self.gt_img_view = vispy.scene.widgets.ViewBox(
           border_color='white', parent=self.img_canvas.scene)
-      self.img_grid.add_widget(self.gt_img_view, 2, 0)
+      self.img_grid.add_widget(self.gt_img_view, 1+self.semantics, 0)
       self.gt_img_vis = visuals.Image(cmap='viridis')
       self.gt_img_view.add(self.gt_img_vis)
 

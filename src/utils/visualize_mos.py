@@ -117,14 +117,6 @@ if __name__ == '__main__':
       label_paths = os.path.join(CFG['dataset']['root_folder'],
                                  FLAGS.sequence, sensor_name, "labels")
       FLAGS.ground_truth = False
-    if FLAGS.ground_truth:
-      gt_paths = os.path.join(CFG['dataset']['root_folder'],
-                                 FLAGS.sequence, sensor_name, "labels")
-      gt_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
-          os.path.expanduser(gt_paths)) for f in fn]
-      gt_names.sort()
-    else: 
-      gt_names = None
     if os.path.isdir(label_paths):
       print("Labels folder exists! Using labels from %s" % label_paths)
     else:
@@ -140,8 +132,17 @@ if __name__ == '__main__':
     if not FLAGS.ignore_safety:
       assert(len(label_names) == len(scan_names))
 
+  if FLAGS.ground_truth:
+    gt_paths = os.path.join(CFG['dataset']['root_folder'],
+                                FLAGS.sequence, sensor_name, "labels")
+    gt_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
+        os.path.expanduser(gt_paths)) for f in fn]
+    gt_names.sort()
+  else: 
+    gt_names = None
+    
   # create a scan
-  if FLAGS.ignore_semantics:
+  if FLAGS.ignore_semantics and not FLAGS.ground_truth:
     scan = LaserScan(project=True, H=CFG['dataset']['sensor']['height'],W=CFG['dataset']['sensor']['width'], fov_up=CFG['dataset']['sensor']['fov_up'], fov_down=CFG['dataset']['sensor']['fov_down'], filter=CFG['dataset']['filter_points'])  # project all opened scans to spheric proj
   else:
     color_dict = CFG['labels']["color_map"]
