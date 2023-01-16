@@ -161,14 +161,13 @@ if __name__ == '__main__':
   sensor_name = master_config['dataset']['sensor']['name']
 
   res_config = master_config['residual_images']
-  for num_last_n_idx in tqdm(res_config['num_last_n'], total=len(res_config['num_last_n']), desc="num_last_n"):
+  for num_last_n in tqdm(res_config['num_last_n'], total=len(res_config['num_last_n']), desc="num_last_n"):
     for seq_idx in trange(len(res_config['seqs']), desc="Sequence in Num_last_n", leave=False):
       # specify parameters
       seq_num = res_config['seqs'][seq_idx]
       num_frames = res_config['num_frames']
       debug = res_config['debug']
       normalize = res_config['normalize']
-      num_last_n = res_config['num_last_n'][num_last_n_idx]
       visualize = res_config['visualize']
       visualization_folder = res_config['visualization_folder'].replace('SEQ_NUM', str(seq_num)).replace('SENSOR', sensor_name)+str(num_last_n)
       
