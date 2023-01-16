@@ -62,7 +62,8 @@
                 "-p",
                 "/home/joe46973/Masterarbeit/LiDAR-MOS/logs/modified_training/logs/2022-12-21-14:46_e6724d0_finetuned_30e5ad4",
                 "-s",
-                "Sequence_5",
+                "Sequence_1",
+                "-gt"
 
             ],
             "request": "launch",

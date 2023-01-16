@@ -14,17 +14,13 @@ class LaserScanVis:
   """Class that creates and handles a visualizer for a pointcloud"""
 
   def __init__(self, scan, scan_names, label_names, offset=0,
-               semantics=True, instances=False):
+               semantics=True, gt_names = None):
     self.scan = scan
     self.scan_names = scan_names
     self.label_names = label_names
     self.offset = offset
     self.semantics = semantics
-    self.instances = instances
-    # sanity check
-    if not self.semantics and self.instances:
-      print("Instances are only allowed in when semantics=True")
-      raise ValueError
+    self.gt_names = gt_names
 
     self.reset()
     self.update_scan()
@@ -63,16 +59,16 @@ class LaserScanVis:
       visuals.XYZAxis(parent=self.sem_view.scene)
       self.sem_view.camera.link(self.scan_view.camera)
 
-    if self.instances:
-      print("Using instances in visualizer")
-      self.inst_view = vispy.scene.widgets.ViewBox(
+    if self.gt_names:
+      print("Using gt_names in visualizer")
+      self.gt_view = vispy.scene.widgets.ViewBox(
           border_color='white', parent=self.canvas.scene)
-      self.grid.add_widget(self.inst_view, 0, 2)
-      self.inst_vis = visuals.Markers()
-      self.inst_view.camera = 'turntable'
-      self.inst_view.add(self.inst_vis)
-      visuals.XYZAxis(parent=self.inst_view.scene)
-      # self.inst_view.camera.link(self.scan_view.camera)
+      self.grid.add_widget(self.gt_view, 0, 2)
+      self.gt_vis = visuals.Markers()
+      self.gt_view.camera = 'turntable'
+      self.gt_view.add(self.gt_vis)
+      visuals.XYZAxis(parent=self.gt_view.scene)
+      self.gt_view.camera.link(self.scan_view.camera)
 
     # img canvas size
     self.multiplier = 1
@@ -80,7 +76,7 @@ class LaserScanVis:
     self.canvas_H = 128
     if self.semantics:
       self.multiplier += 1
-    if self.instances:
+    if self.gt_names:
       self.multiplier += 1
 
     # new canvas for img
@@ -109,13 +105,13 @@ class LaserScanVis:
       self.sem_img_vis = visuals.Image(cmap='viridis')
       self.sem_img_view.add(self.sem_img_vis)
 
-    # add instances
-    if self.instances:
-      self.inst_img_view = vispy.scene.widgets.ViewBox(
+    # add gt_names
+    if self.gt_names:
+      self.gt_img_view = vispy.scene.widgets.ViewBox(
           border_color='white', parent=self.img_canvas.scene)
-      self.img_grid.add_widget(self.inst_img_view, 2, 0)
-      self.inst_img_vis = visuals.Image(cmap='viridis')
-      self.inst_img_view.add(self.inst_img_vis)
+      self.img_grid.add_widget(self.gt_img_view, 2, 0)
+      self.gt_img_vis = visuals.Image(cmap='viridis')
+      self.gt_img_view.add(self.gt_img_vis)
 
   def get_mpl_colormap(self, cmap_name):
     cmap = plt.get_cmap(cmap_name)
@@ -134,6 +130,10 @@ class LaserScanVis:
     if self.semantics:
       self.scan.open_label(self.label_names[self.offset])
       self.scan.colorize()
+    if self.gt_names:
+      self.scan.open_gt_label(self.gt_names[self.offset])
+      self.scan.gt_colorize()
+
 
     # then change names
     title = "scan " + self.scan_names[self.offset].split(os.sep)[-1] + f" in [{self.scan_names[0].split(os.sep)[-1][:-4]} - {self.scan_names[-1].split(os.sep)[-1][:-4]}]"
@@ -166,17 +166,16 @@ class LaserScanVis:
                             edge_color=self.scan.sem_label_color[..., ::-1],
                             size=1)
 
-    # plot instances
-    if self.instances:
-      self.inst_vis.set_data(self.scan.points,
-                             face_color=self.scan.inst_label_color[..., ::-1],
-                             edge_color=self.scan.inst_label_color[..., ::-1],
+    # plot gt_names
+    if self.gt_names:
+      self.gt_vis.set_data(self.scan.points,
+                             face_color=self.scan.gt_label_color[..., ::-1],
+                             edge_color=self.scan.gt_label_color[..., ::-1],
                              size=1)
+      self.gt_img_vis.set_data(self.scan.proj_gt_color[..., ::-1])
+      self.gt_img_vis.update()
 
-
-    if self.instances:
-      self.inst_img_vis.set_data(self.scan.proj_inst_color[..., ::-1])
-      self.inst_img_vis.update()
+    self.resize_images(None)
 
   def resize_images(self, event):
     #print("recieved resizing event: %s" % event)
@@ -198,6 +197,12 @@ class LaserScanVis:
       data_sem = cv2.resize(self.scan.proj_sem_color[..., ::-1], dsize=[int(s) for s in size], interpolation=cv2.INTER_CUBIC)
       self.sem_img_vis.set_data(data_sem)
       self.sem_img_vis.update()
+    if self.gt_names:
+      size = self.gt_img_view.size
+      data_gt = cv2.resize(self.scan.proj_gt_color[..., ::-1], dsize=[int(s) for s in size], interpolation=cv2.INTER_CUBIC)
+      self.gt_img_vis.set_data(data_gt)
+      self.gt_img_vis.update()
+
 
 
   # interface

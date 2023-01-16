@@ -5,7 +5,7 @@
 import argparse
 import os
 import yaml
-from laserscan import LaserScan, SemLaserScan
+from laserscan import LaserScan, SemLaserScan, SemGTLaserScan
 from laserscanvis import LaserScanVis
 from __init__ import RPATH
 if __name__ == '__main__':
@@ -43,8 +43,8 @@ if __name__ == '__main__':
       'Defaults to %(default)s',
   )
   parser.add_argument(
-      '--do_instances', '-di',
-      dest='do_instances',
+      '--ground_truth', '-gt',
+      dest='ground_truth',
       default=False,
       action='store_true',
       help='Visualize instances too. Defaults to %(default)s',
@@ -75,7 +75,7 @@ if __name__ == '__main__':
   print("Sequence", FLAGS.sequence)
   print("Predictions", FLAGS.predictions)
   print("ignore_semantics", FLAGS.ignore_semantics)
-  print("do_instances", FLAGS.do_instances)
+  print("ground_truth", FLAGS.ground_truth)
   print("ignore_safety", FLAGS.ignore_safety)
   print("offset", FLAGS.offset)
   print("*" * 80)
@@ -112,10 +112,19 @@ if __name__ == '__main__':
   if not FLAGS.ignore_semantics:
     if FLAGS.predictions is not None:
       label_paths = os.path.join(FLAGS.predictions, "sequences",
-                                 FLAGS.sequence,sensor_name, "predictions")
+                                 FLAGS.sequence, sensor_name, "predictions")
     else:
       label_paths = os.path.join(CFG['dataset']['root_folder'],
                                  FLAGS.sequence, sensor_name, "labels")
+      FLAGS.ground_truth = False
+    if FLAGS.ground_truth:
+      gt_paths = os.path.join(CFG['dataset']['root_folder'],
+                                 FLAGS.sequence, sensor_name, "labels")
+      gt_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
+          os.path.expanduser(gt_paths)) for f in fn]
+      gt_names.sort()
+    else: 
+      gt_names = None
     if os.path.isdir(label_paths):
       print("Labels folder exists! Using labels from %s" % label_paths)
     else:
@@ -141,18 +150,20 @@ if __name__ == '__main__':
     color_dict[0] = [128,128,128]
     color_dict[9] = [255,255,255]
     color_dict[251] = [0,0,255]
-    scan = SemLaserScan(sem_color_dict=color_dict, project=True, H=CFG['dataset']['sensor']['height'],W=CFG['dataset']['sensor']['width'], fov_up=CFG['dataset']['sensor']['fov_up'], fov_down=CFG['dataset']['sensor']['fov_down'],filter=CFG['dataset']['filter_points'])
+    if FLAGS.ground_truth:
+      scan = SemGTLaserScan(sem_color_dict=color_dict, project=True, H=CFG['dataset']['sensor']['height'],W=CFG['dataset']['sensor']['width'], fov_up=CFG['dataset']['sensor']['fov_up'], fov_down=CFG['dataset']['sensor']['fov_down'],filter=CFG['dataset']['filter_points'])
+    else:
+      scan = SemLaserScan(sem_color_dict=color_dict, project=True, H=CFG['dataset']['sensor']['height'],W=CFG['dataset']['sensor']['width'], fov_up=CFG['dataset']['sensor']['fov_up'], fov_down=CFG['dataset']['sensor']['fov_down'],filter=CFG['dataset']['filter_points'])
 
   # create a visualizer
   semantics = not FLAGS.ignore_semantics
-  instances = FLAGS.do_instances
   if not semantics:
     label_names = None
   vis = LaserScanVis(scan=scan,
                      scan_names=scan_names,
                      label_names=label_names,
                      offset=FLAGS.offset,
-                     semantics=semantics, instances=instances and semantics)
+                     semantics=semantics, gt_names = gt_names)
 
   # print instructions
   print("To navigate:")

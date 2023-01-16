@@ -343,3 +343,90 @@ class SemLaserScan(LaserScan):
         # instances
         self.proj_inst_label[mask] = self.inst_label[self.proj_idx[mask]]
         self.proj_inst_color[mask] = self.inst_color_lut[self.inst_label[self.proj_idx[mask]]]
+
+class SemGTLaserScan(SemLaserScan):
+    """LaserScan with prediction and GT
+
+    Parameters
+    ----------
+    SemLaserScan : _type_
+        _description_
+    """
+
+    def __init__(self, sem_color_dict=None, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0, max_classes=300,DA=False,flip_sign=False,drop_points=False, filter=False):
+        super(SemGTLaserScan, self).__init__(sem_color_dict, project, H, W, fov_up, fov_down,DA=DA,flip_sign=flip_sign,drop_points=drop_points, filter=filter)
+        self.reset()
+
+
+    def reset(self):
+        """ Reset scan members. """
+        super(SemGTLaserScan, self).reset()
+
+        # semantic labels
+        self.gt_label = np.zeros((0, 1), dtype=np.int32)  # [m, 1]: label
+        self.gt_label_color = np.zeros((0, 3), dtype=np.float32)  # [m ,3]: color
+
+        # projection color with semantic labels
+        self.proj_gt_label = np.zeros((self.proj_H, self.proj_W),
+                                       dtype=np.int32)  # [H,W]  label
+        self.proj_gt_color = np.zeros((self.proj_H, self.proj_W, 3),
+                                       dtype=np.float)  # [H,W,3] color
+
+    def open_gt_label(self, filename):
+        """ Open gt label and fill in attributes
+        """
+        # check filename is string
+        if not isinstance(filename, str):
+            raise TypeError("Filename should be string type, "
+                            "but was {type}".format(type=str(type(filename))))
+
+        # check extension is a laserscan
+        if not any(filename.endswith(ext) for ext in self.EXTENSIONS_LABEL):
+            raise RuntimeError("Filename extension is not valid label file.")
+
+        # if all goes well, open label
+        label = np.fromfile(filename, dtype=np.int32)
+        label = label.reshape((-1))
+
+        if self.drop_points is not False:
+            label = np.delete(label,self.points_to_drop)
+        # set it
+        self.set_gt_label(label)
+
+    def set_gt_label(self, label):
+        """ Set points for label not from file but from np
+        """
+        # check label makes sense
+        if not isinstance(label, np.ndarray):
+            raise TypeError("Label should be numpy array")
+
+        if not np.all(self.valid_idx) and self.filter and np.sum(self.valid_idx) < label.shape[0]:
+            label = label[self.valid_idx]
+        # only fill in attribute if the right size
+        if label.shape[0] == self.points.shape[0]:
+            self.gt_label = label & 0xFFFF  # semantic label in lower half
+        else:
+            print("Points shape: ", self.points.shape)
+            print("Sem Label shape: ", label.shape)
+            raise ValueError("Scan and Sem Label don't contain same number of points")
+
+        if self.project:
+            self.do_gt_label_projection()
+
+    def gt_colorize(self):
+        """ Colorize pointcloud with the color of each semantic label
+        """
+        self.gt_label_color = self.sem_color_lut[self.gt_label]
+        self.gt_label_color = self.gt_label_color.reshape((-1, 3))
+
+    def do_gt_label_projection(self):
+        # only map colors to labels that exist
+        mask = self.proj_idx >= 0
+
+        # semantics
+        self.proj_gt_label[mask] = self.gt_label[self.proj_idx[mask]]
+        self.proj_gt_color[mask] = self.sem_color_lut[self.gt_label[self.proj_idx[mask]]]
+
+        # instances
+        self.proj_inst_label[mask] = self.inst_label[self.proj_idx[mask]]
+        self.proj_inst_color[mask] = self.inst_color_lut[self.inst_label[self.proj_idx[mask]]]
