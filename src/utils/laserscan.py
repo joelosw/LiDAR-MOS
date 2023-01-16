@@ -6,6 +6,7 @@ import numpy as np
 import math
 import random
 from scipy.spatial.transform import Rotation as R
+from utils import label_map
 
 class LaserScan:
     """Class that contains LaserScan with x,y,z,r"""
@@ -353,8 +354,10 @@ class SemGTLaserScan(SemLaserScan):
         _description_
     """
 
-    def __init__(self, sem_color_dict=None, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0, max_classes=300,DA=False,flip_sign=False,drop_points=False, filter=False):
+    def __init__(self, sem_color_dict=None, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0, max_classes=300,DA=False,flip_sign=False,drop_points=False, filter=False, learning_map=None, learning_map_inv=None):
         super(SemGTLaserScan, self).__init__(sem_color_dict, project, H, W, fov_up, fov_down,DA=DA,flip_sign=flip_sign,drop_points=drop_points, filter=filter)
+        self.learning_map = learning_map
+        self.learning_map_inv = learning_map_inv
         self.reset()
 
 
@@ -415,8 +418,13 @@ class SemGTLaserScan(SemLaserScan):
 
     def gt_colorize(self):
         """ Colorize pointcloud with the color of each semantic label
+        Potentially color in the same way as the output -> apply learning_map and learning_map_inv
         """
-        self.gt_label_color = self.sem_color_lut[self.gt_label]
+        if self.learning_map and self.learning_map_inv:
+            labels=label_map(label_map(self.gt_label, self.learning_map),self.learning_map_inv)
+        else:
+            labels=self.gt_label
+        self.gt_label_color = self.sem_color_lut[labels]
         self.gt_label_color = self.gt_label_color.reshape((-1, 3))
 
     def do_gt_label_projection(self):
@@ -425,8 +433,7 @@ class SemGTLaserScan(SemLaserScan):
 
         # semantics
         self.proj_gt_label[mask] = self.gt_label[self.proj_idx[mask]]
-        self.proj_gt_color[mask] = self.sem_color_lut[self.gt_label[self.proj_idx[mask]]]
-
-        # instances
-        self.proj_inst_label[mask] = self.inst_label[self.proj_idx[mask]]
-        self.proj_inst_color[mask] = self.inst_color_lut[self.inst_label[self.proj_idx[mask]]]
+        if self.learning_map and self.learning_map_inv:
+            self.proj_gt_color[mask] = self.sem_color_lut[label_map(label_map(self.gt_label, self.learning_map), self.learning_map_inv)[self.proj_idx[mask]]]
+        else:
+            self.proj_gt_color[mask] = self.sem_color_lut[self.gt_label[self.proj_idx[mask]]]

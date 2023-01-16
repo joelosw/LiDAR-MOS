@@ -151,7 +151,8 @@ if __name__ == '__main__':
     color_dict[9] = [255,255,255]
     color_dict[251] = [0,0,255]
     if FLAGS.ground_truth:
-      scan = SemGTLaserScan(sem_color_dict=color_dict, project=True, H=CFG['dataset']['sensor']['height'],W=CFG['dataset']['sensor']['width'], fov_up=CFG['dataset']['sensor']['fov_up'], fov_down=CFG['dataset']['sensor']['fov_down'],filter=CFG['dataset']['filter_points'])
+      scan = SemGTLaserScan(sem_color_dict=color_dict, project=True, H=CFG['dataset']['sensor']['height'],W=CFG['dataset']['sensor']['width'], fov_up=CFG['dataset']['sensor']['fov_up'], fov_down=CFG['dataset']['sensor']['fov_down'],filter=CFG['dataset']['filter_points'],
+      learning_map=CFG['labels']['learning_map'], learning_map_inv=CFG['labels']['learning_map_inv'])
     else:
       scan = SemLaserScan(sem_color_dict=color_dict, project=True, H=CFG['dataset']['sensor']['height'],W=CFG['dataset']['sensor']['width'], fov_up=CFG['dataset']['sensor']['fov_up'], fov_down=CFG['dataset']['sensor']['fov_down'],filter=CFG['dataset']['filter_points'])
 
